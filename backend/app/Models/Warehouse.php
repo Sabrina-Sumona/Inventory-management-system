@@ -4,41 +4,44 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Company extends Model
+class Warehouse extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
+        'company_id',
+        'branch_id',
         'name',
         'code',
         'email',
-        'website',
         'phone',
         'address',
-        'timezone',
-        'currency',
+        'city',
+        'district',
+        'postal_code',
+        'is_primary',
         'is_active',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_primary' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
 
-    public function branches(): HasMany
+    public function company(): BelongsTo
     {
-        return $this->hasMany(Branch::class);
-    }
-    
-    public function warehouses(): HasMany
-    {
-        return $this->hasMany(Warehouse::class);
+        return $this->belongsTo(Company::class);
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }
