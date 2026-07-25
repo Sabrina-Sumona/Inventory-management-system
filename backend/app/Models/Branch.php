@@ -4,35 +4,38 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Company extends Model
+class Branch extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
+        'company_id',
         'name',
         'code',
         'email',
-        'website',
         'phone',
         'address',
-        'timezone',
-        'currency',
+        'city',
+        'district',
+        'postal_code',
+        'is_head_office',
         'is_active',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_head_office' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
 
-    public function branches(): HasMany
+    public function company(): BelongsTo
     {
-        return $this->hasMany(Branch::class);
+        return $this->belongsTo(Company::class);
     }
 }

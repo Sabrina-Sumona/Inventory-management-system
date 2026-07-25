@@ -11,27 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('companies', function (Blueprint $table) {
+        Schema::create('branches', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name');
-            $table->string('code', 50)->unique();
+            $table->foreignId('company_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
+            $table->string('name');
+            $table->string('code', 50);
             $table->string('email')->nullable();
-            $table->string('website')->nullable();
             $table->string('phone', 30)->nullable();
             $table->text('address')->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('district', 100)->nullable();
+            $table->string('postal_code', 20)->nullable();
 
-            $table->string('timezone', 100)->default('Asia/Dhaka');
-            $table->string('currency', 3)->default('BDT');
-
+            $table->boolean('is_head_office')->default(false);
             $table->boolean('is_active')->default(true);
 
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['company_id', 'code']);
+            $table->index(['company_id', 'is_active']);
             $table->index('name');
-            $table->index('is_active');
         });
     }
 
@@ -40,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::dropIfExists('branches');
     }
 };
