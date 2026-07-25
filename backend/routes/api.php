@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -13,6 +14,11 @@ Route::get('/health', function () {
         ],
     ]);
 });
+
+Route::post('/auth/login', [
+    AuthenticatedSessionController::class,
+    'store',
+])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->get('/auth/user', function (Request $request) {
     return response()->json([
