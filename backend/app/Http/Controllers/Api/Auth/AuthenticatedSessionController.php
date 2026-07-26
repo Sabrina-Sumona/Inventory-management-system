@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\UserResource;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -36,11 +37,7 @@ class AuthenticatedSessionController extends Controller
             'success' => true,
             'message' => 'Logged in successfully.',
             'data' => [
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
+                'user' => UserResource::make($user)->resolve($request),
             ],
         ]);
     }

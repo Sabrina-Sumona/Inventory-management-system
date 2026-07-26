@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\Auth\CurrentUserController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -21,15 +21,7 @@ Route::post('/auth/login', [
 ])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/auth/user', function (Request $request) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Authenticated user retrieved successfully.',
-            'data' => [
-                'user' => $request->user(),
-            ],
-        ]);
-    });
+    Route::get('/auth/user', CurrentUserController::class);
 
     Route::post('/auth/logout', [
         AuthenticatedSessionController::class,
