@@ -66,4 +66,14 @@ class Role extends Model
     {
         $this->permissions()->detach($permission->id);
     }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'role_user'
+        )
+            ->withPivot('assigned_by')
+            ->withTimestamps();
+    }
 }

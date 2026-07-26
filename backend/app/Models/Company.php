@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class Company extends Model
 {
@@ -49,6 +50,22 @@ class Company extends Model
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function scopeAccessibleTo(
+        Builder $query,
+        User $user
+    ): Builder {
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->whereKey($user->company_id);
     }
 
 }
