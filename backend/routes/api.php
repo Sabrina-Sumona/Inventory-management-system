@@ -19,17 +19,17 @@ Route::get('/health', function () {
 Route::post('/auth/login', [
     AuthenticatedSessionController::class,
     'store',
-])->middleware('throttle:5,1');
+])->middleware('throttle:login');
 
 Route::post('/auth/forgot-password', [
     PasswordResetController::class,
     'sendResetLink',
-])->middleware('throttle:3,1');
+])->middleware('throttle:password-reset-link');
 
 Route::post('/auth/reset-password', [
     PasswordResetController::class,
     'reset',
-])->middleware('throttle:5,1');
+])->middleware('throttle:password-reset');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/user', CurrentUserController::class);
