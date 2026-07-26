@@ -20,12 +20,19 @@ Route::post('/auth/login', [
     'store',
 ])->middleware('throttle:5,1');
 
-Route::middleware('auth:sanctum')->get('/auth/user', function (Request $request) {
-    return response()->json([
-        'success' => true,
-        'message' => 'Authenticated user retrieved successfully.',
-        'data' => [
-            'user' => $request->user(),
-        ],
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/auth/user', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Authenticated user retrieved successfully.',
+            'data' => [
+                'user' => $request->user(),
+            ],
+        ]);
+    });
+
+    Route::post('/auth/logout', [
+        AuthenticatedSessionController::class,
+        'destroy',
     ]);
 });
