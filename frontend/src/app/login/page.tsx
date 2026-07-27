@@ -1,10 +1,13 @@
 "use client";
-
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
-import { authService } from "@/services/authService";
+import { useAuth } from "@/contexts/AuthContext";
 import type { ApiErrorResponse } from "@/types/auth";
 
 interface LoginErrors {
@@ -15,6 +18,20 @@ interface LoginErrors {
 
 export default function LoginPage() {
   const router = useRouter();
+  const {
+    login,
+    user,
+    isLoading: isCheckingAuthentication,
+  } = useAuth();
+  useEffect(() => {
+    if (!isCheckingAuthentication && user) {
+      router.replace("/dashboard");
+    }
+  }, [
+    isCheckingAuthentication,
+    user,
+    router,
+  ]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +47,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await authService.login({
+      await login({
         email,
         password,
       });

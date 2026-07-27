@@ -18,6 +18,14 @@ export interface LoginResponse {
   };
 }
 
+export interface CurrentUserResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: AuthUser;
+  };
+}
+
 export interface ApiErrorResponse {
   success?: boolean;
   message?: string;
