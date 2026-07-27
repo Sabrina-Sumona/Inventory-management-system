@@ -9,6 +9,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,5 +78,11 @@ class AppServiceProvider extends ServiceProvider
                 );
             }
         );
+    
+        Gate::before(function (User $user, string $ability): ?bool {
+            return $user->isSuperAdmin()
+                ? true
+                : null;
+        });
     }
 }

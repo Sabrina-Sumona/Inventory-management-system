@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -306,4 +307,22 @@ class User extends Authenticatable
             ->wherePivot('is_primary', true)
             ->first();
     }
+
+    public function hasPermission(string $permissionCode): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->roles()
+            ->where('roles.is_active', true)
+            ->whereHas(
+                'permissions',
+                fn (Builder $query) => $query
+                    ->where('permissions.code', $permissionCode)
+                    ->where('permissions.is_active', true)
+            )
+            ->exists();
+    }
+    
 }
