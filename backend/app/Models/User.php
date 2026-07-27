@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
@@ -119,4 +120,93 @@ class User extends Authenticatable
             ],
         ]);
     }
+
+    public function branches(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Branch::class,
+            'branch_user'
+        )
+            ->withPivot([
+                'assigned_by',
+                'is_primary',
+            ])
+            ->withTimestamps();
+    }
+
+    public function canAccessBranch(Branch|int $branch): bool
+    {
+        $branchModel = $branch instanceof Branch
+            ? $branch
+            : Branch::find($branch);
+
+        if ($branchModel === null) {
+            return false;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->canAccessCompany($branchModel->company_id)) {
+            return false;
+        }
+
+        return $this->branches()
+            ->where('branches.id', $branchModel->id)
+            ->exists();
+    }
+
+    public function assignBranch(
+        Branch $branch,
+        bool $isPrimary = false,
+        ?User $assignedBy = null
+    ): void {
+        if ($this->company_id === null) {
+            throw new InvalidArgumentException(
+                'A global user does not require branch assignment.'
+            );
+        }
+
+        if ((int) $branch->company_id !== (int) $this->company_id) {
+            throw new InvalidArgumentException(
+                'The branch belongs to a different company.'
+            );
+        }
+
+        DB::transaction(function () use (
+            $branch,
+            $isPrimary,
+            $assignedBy
+        ): void {
+            if ($isPrimary) {
+                DB::table('branch_user')
+                    ->where('user_id', $this->id)
+                    ->update([
+                        'is_primary' => false,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            $this->branches()->syncWithoutDetaching([
+                $branch->id => [
+                    'assigned_by' => $assignedBy?->id,
+                    'is_primary' => $isPrimary,
+                ],
+            ]);
+        });
+    }
+
+    public function removeBranch(Branch $branch): void
+    {
+        $this->branches()->detach($branch->id);
+    }
+
+    public function primaryBranch(): ?Branch
+    {
+        return $this->branches()
+            ->wherePivot('is_primary', true)
+            ->first();
+    }
+
 }

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Branch extends Model
 {
@@ -48,6 +50,40 @@ class Branch extends Model
     public function warehouseLocations(): HasMany
     {
         return $this->hasMany(WarehouseLocation::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'branch_user'
+        )
+            ->withPivot([
+                'assigned_by',
+                'is_primary',
+            ])
+            ->withTimestamps();
+    }
+
+    public function scopeAccessibleTo(
+        Builder $query,
+        User $user
+    ): Builder {
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        if ($user->company_id === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->where('branches.company_id', $user->company_id)
+            ->whereHas(
+                'users',
+                fn (Builder $userQuery) => $userQuery
+                    ->where('users.id', $user->id)
+            );
     }
 
 }

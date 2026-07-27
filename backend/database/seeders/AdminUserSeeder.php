@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
@@ -13,6 +14,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         $company = Company::where('code', 'DESH-SOLAR')
+            ->firstOrFail();
+
+        $branch = Branch::where('company_id', $company->id)
+            ->where('code', 'HEAD-OFFICE')
             ->firstOrFail();
 
         $companyAdminRole = Role::where(
@@ -33,5 +38,10 @@ class AdminUserSeeder extends Seeder
         );
 
         $user->assignRole($companyAdminRole);
+
+        $user->assignBranch(
+            branch: $branch,
+            isPrimary: true,
+        );
     }
 }
