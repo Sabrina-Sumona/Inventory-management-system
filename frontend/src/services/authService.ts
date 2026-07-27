@@ -4,6 +4,7 @@ import type {
   CurrentUserResponse,
   LoginCredentials,
   LoginResponse,
+  PasswordResetResponse,
 } from "@/types/auth";
 
 export const authService = {
@@ -31,5 +32,21 @@ export const authService = {
   async logout(): Promise<void> {
     await api.get("/sanctum/csrf-cookie");
     await api.post("/api/auth/logout");
+  },
+
+  async forgotPassword(
+    email: string
+  ): Promise<PasswordResetResponse> {
+    await api.get("/sanctum/csrf-cookie");
+
+    const response =
+      await api.post<PasswordResetResponse>(
+        "/api/auth/forgot-password",
+        {
+          email,
+        }
+      );
+
+    return response.data;
   },
 };

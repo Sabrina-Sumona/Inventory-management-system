@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ApiErrorResponse } from "@/types/auth";
 
+import Link from "next/link";
+
 interface LoginErrors {
   email?: string;
   password?: string;
@@ -198,12 +200,12 @@ export default function LoginPage() {
                       Password
                     </label>
 
-                    <button
-                      type="button"
+                    <Link
+                      href="/forgot-password"
                       className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
-                    >
+                      >
                       Forgot password?
-                    </button>
+                    </Link>
                   </div>
 
                   <input

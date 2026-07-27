@@ -26,6 +26,11 @@ export interface CurrentUserResponse {
   };
 }
 
+export interface PasswordResetResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface ApiErrorResponse {
   success?: boolean;
   message?: string;
