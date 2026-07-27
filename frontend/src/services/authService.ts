@@ -5,6 +5,7 @@ import type {
   LoginCredentials,
   LoginResponse,
   PasswordResetResponse,
+  ResetPasswordCredentials,
 } from "@/types/auth";
 
 export const authService = {
@@ -49,4 +50,19 @@ export const authService = {
 
     return response.data;
   },
+  
+  async resetPassword(
+    credentials: ResetPasswordCredentials
+  ): Promise<PasswordResetResponse> {
+    await api.get("/sanctum/csrf-cookie");
+
+    const response =
+      await api.post<PasswordResetResponse>(
+        "/api/auth/reset-password",
+        credentials
+      );
+
+    return response.data;
+  },
+
 };

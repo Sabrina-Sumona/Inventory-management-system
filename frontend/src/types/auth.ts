@@ -25,7 +25,12 @@ export interface CurrentUserResponse {
     user: AuthUser;
   };
 }
-
+export interface ResetPasswordCredentials {
+  token: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
 export interface PasswordResetResponse {
   success: boolean;
   message: string;
