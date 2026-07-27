@@ -43,34 +43,59 @@ export function AuthProvider({
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const authenticatedUser =
-        await authService.getCurrentUser();
+  try {
+    const authenticatedUser =
+      await authService.getCurrentUser();
 
-      setUser(authenticatedUser);
-    } catch {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    setUser(authenticatedUser);
+  } catch {
+    setUser(null);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
-  useEffect(() => {
-    void refreshUser();
-  }, [refreshUser]);
+useEffect(() => {
+  let isActive = true;
+
+  authService
+    .getCurrentUser()
+    .then((authenticatedUser) => {
+      if (isActive) {
+        setUser(authenticatedUser);
+      }
+    })
+    .catch(() => {
+      if (isActive) {
+        setUser(null);
+      }
+    })
+    .finally(() => {
+      if (isActive) {
+        setIsLoading(false);
+      }
+    });
+
+  return () => {
+    isActive = false;
+  };
+}, []);
 
   const login = useCallback(
-    async (
-      credentials: LoginCredentials
-    ): Promise<void> => {
-      const response = await authService.login(credentials);
+  async (
+    credentials: LoginCredentials
+  ): Promise<void> => {
+    await authService.login(credentials);
 
-      setUser(response.data.user);
-    },
-    []
-  );
+    const authenticatedUser =
+      await authService.getCurrentUser();
+
+    setUser(authenticatedUser);
+  },
+  []
+);
 
   const logout = useCallback(async (): Promise<void> => {
     try {
