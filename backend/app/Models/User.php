@@ -209,4 +209,101 @@ class User extends Authenticatable
             ->first();
     }
 
+    public function warehouses(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Warehouse::class,
+            'user_warehouse'
+        )
+            ->withPivot([
+                'assigned_by',
+                'is_primary',
+            ])
+            ->withTimestamps();
+    }
+
+    public function canAccessWarehouse(Warehouse|int $warehouse): bool
+    {
+        $warehouseModel = $warehouse instanceof Warehouse
+            ? $warehouse
+            : Warehouse::find($warehouse);
+
+        if ($warehouseModel === null) {
+            return false;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->canAccessCompany($warehouseModel->company_id)) {
+            return false;
+        }
+
+        if (! $this->canAccessBranch($warehouseModel->branch_id)) {
+            return false;
+        }
+
+        return $this->warehouses()
+            ->where('warehouses.id', $warehouseModel->id)
+            ->exists();
+    }
+
+    public function assignWarehouse(
+        Warehouse $warehouse,
+        bool $isPrimary = false,
+        ?User $assignedBy = null
+    ): void {
+        if ($this->company_id === null) {
+            throw new InvalidArgumentException(
+                'A global user does not require warehouse assignment.'
+            );
+        }
+
+        if ((int) $warehouse->company_id !== (int) $this->company_id) {
+            throw new InvalidArgumentException(
+                'The warehouse belongs to a different company.'
+            );
+        }
+
+        if (! $this->canAccessBranch($warehouse->branch_id)) {
+            throw new InvalidArgumentException(
+                'The user must be assigned to the warehouse branch first.'
+            );
+        }
+
+        DB::transaction(function () use (
+            $warehouse,
+            $isPrimary,
+            $assignedBy
+        ): void {
+            if ($isPrimary) {
+                DB::table('user_warehouse')
+                    ->where('user_id', $this->id)
+                    ->update([
+                        'is_primary' => false,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            $this->warehouses()->syncWithoutDetaching([
+                $warehouse->id => [
+                    'assigned_by' => $assignedBy?->id,
+                    'is_primary' => $isPrimary,
+                ],
+            ]);
+        });
+    }
+
+    public function removeWarehouse(Warehouse $warehouse): void
+    {
+        $this->warehouses()->detach($warehouse->id);
+    }
+
+    public function primaryWarehouse(): ?Warehouse
+    {
+        return $this->warehouses()
+            ->wherePivot('is_primary', true)
+            ->first();
+    }
 }

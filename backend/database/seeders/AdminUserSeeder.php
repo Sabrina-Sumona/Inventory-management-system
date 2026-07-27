@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,6 +19,11 @@ class AdminUserSeeder extends Seeder
 
         $branch = Branch::where('company_id', $company->id)
             ->where('code', 'HEAD-OFFICE')
+            ->firstOrFail();
+
+        $warehouse = Warehouse::where('company_id', $company->id)
+            ->where('branch_id', $branch->id)
+            ->where('code', 'MAIN-WAREHOUSE')
             ->firstOrFail();
 
         $companyAdminRole = Role::where(
@@ -41,6 +47,11 @@ class AdminUserSeeder extends Seeder
 
         $user->assignBranch(
             branch: $branch,
+            isPrimary: true,
+        );
+
+        $user->assignWarehouse(
+            warehouse: $warehouse,
             isPrimary: true,
         );
     }
