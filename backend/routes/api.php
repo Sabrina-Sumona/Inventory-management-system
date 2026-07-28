@@ -1,9 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
+use App\Http\Controllers\Api\CompanyController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
     return response()->json([
@@ -31,11 +32,20 @@ Route::post('/auth/reset-password', [
     'reset',
 ])->middleware('throttle:password-reset');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/auth/user', CurrentUserController::class);
 
     Route::post('/auth/logout', [
         AuthenticatedSessionController::class,
         'destroy',
+    ]);
+
+    Route::apiResource(
+        'companies',
+        CompanyController::class
+    )->only([
+        'index',
+        'show',
+        'update',
     ]);
 });
