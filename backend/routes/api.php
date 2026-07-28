@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\CompanyController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\BranchController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -48,4 +49,23 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'show',
         'update',
     ]);
+
+    Route::apiResource(
+        'branches',
+        BranchController::class
+    )->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
+
+    Route::post(
+        '/branches/{branch}/restore',
+        [
+            BranchController::class,
+            'restore',
+        ]
+    )->whereNumber('branch');
 });
