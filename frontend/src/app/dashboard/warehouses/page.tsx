@@ -193,7 +193,7 @@ export default function WarehousesPage() {
   }
 
   useEffect(() => {
-    let isActive = true;
+    let isMounted = true;
 
     warehouseService
       .getWarehouses({
@@ -203,7 +203,7 @@ export default function WarehousesPage() {
         sort_direction: "asc",
       })
       .then((data) => {
-        if (!isActive) {
+        if (!isMounted) {
           return;
         }
 
@@ -211,7 +211,7 @@ export default function WarehousesPage() {
         setPagination(data.pagination);
       })
       .catch((error: unknown) => {
-        if (!isActive) {
+        if (!isMounted) {
           return;
         }
 
@@ -223,36 +223,40 @@ export default function WarehousesPage() {
         );
       })
       .finally(() => {
-        if (isActive) {
+        if (isMounted) {
           setIsLoading(false);
         }
       });
 
     return () => {
-      isActive = false;
+      isMounted = false;
     };
   }, []);
 
   useEffect(() => {
-    let isActive = true;
+    let isMounted = true;
 
     branchService
       .getBranches({
-        is_active: true,
         sort_by: "name",
         sort_direction: "asc",
         per_page: 100,
         page: 1,
       })
       .then((data) => {
-        if (!isActive) {
+        if (!isMounted) {
           return;
         }
 
-        setBranches(data.branches);
+        const activeBranches =
+          data.branches.filter(
+            (branch) => branch.is_active
+          );
+
+        setBranches(activeBranches);
       })
       .catch((error: unknown) => {
-        if (!isActive) {
+        if (!isMounted) {
           return;
         }
 
@@ -265,7 +269,7 @@ export default function WarehousesPage() {
       });
 
     return () => {
-      isActive = false;
+      isMounted = false;
     };
   }, []);
 
@@ -508,11 +512,9 @@ export default function WarehousesPage() {
             <option value="all">
               All statuses
             </option>
-
             <option value="active">
               Active
             </option>
-
             <option value="inactive">
               Inactive
             </option>
@@ -533,11 +535,9 @@ export default function WarehousesPage() {
             <option value="all">
               All warehouse types
             </option>
-
             <option value="primary">
               Primary warehouse
             </option>
-
             <option value="regular">
               Regular warehouse
             </option>

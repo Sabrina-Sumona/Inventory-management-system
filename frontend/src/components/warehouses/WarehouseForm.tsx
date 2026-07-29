@@ -51,6 +51,15 @@ const emptyForm: WarehouseFormValues = {
   isActive: true,
 };
 
+const inputClassName =
+  "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
+const selectClassName =
+  "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
+const textareaClassName =
+  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
 function nullableValue(
   value: string
 ): string | null {
@@ -243,11 +252,12 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={selectClassName}
               >
                 <option
                   value=""
                   disabled
+                  className="text-slate-400"
                 >
                   Select a branch
                 </option>
@@ -257,6 +267,7 @@ export function WarehouseForm({
                     <option
                       key={branch.id}
                       value={branch.id}
+                      className="text-slate-900"
                     >
                       {branch.name} (
                       {branch.code})
@@ -302,7 +313,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.name && (
@@ -333,7 +344,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 uppercase outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={`${inputClassName} uppercase`}
               />
 
               {errors.code && (
@@ -363,7 +374,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.email && (
@@ -392,7 +403,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.phone && (
@@ -421,7 +432,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.city && (
@@ -450,7 +461,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.district && (
@@ -479,7 +490,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               />
 
               {errors.postal_code && (
@@ -566,7 +577,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-3 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={textareaClassName}
               />
 
               {errors.address && (
@@ -582,7 +593,7 @@ export function WarehouseForm({
               type="button"
               onClick={onCancel}
               disabled={isSaving}
-              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>

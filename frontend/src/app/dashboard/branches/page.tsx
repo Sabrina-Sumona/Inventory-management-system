@@ -62,6 +62,12 @@ const emptyForm: BranchFormValues = {
   isActive: true,
 };
 
+const inputClassName =
+  "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
+const textareaClassName =
+  "w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
 function nullableValue(
   value: string
 ): string | null {
@@ -76,7 +82,9 @@ function branchToForm(
   branch: Branch | null
 ): BranchFormValues {
   if (!branch) {
-    return emptyForm;
+    return {
+      ...emptyForm,
+    };
   }
 
   return {
@@ -100,8 +108,10 @@ function getApiMessage(
   const axiosError =
     error as AxiosError<ApiErrorResponse>;
 
-  return axiosError.response?.data?.message ??
-    fallback;
+  return (
+    axiosError.response?.data?.message ??
+    fallback
+  );
 }
 
 function getValidationErrors(
@@ -195,7 +205,7 @@ function BranchForm({
             onClick={onCancel}
             disabled={isSaving}
             aria-label="Close form"
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             ✕
           </button>
@@ -226,7 +236,7 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
 
               {errors.name && (
@@ -257,7 +267,7 @@ function BranchForm({
                 }
                 disabled={isSaving}
                 placeholder="DHAKA-BRANCH"
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 uppercase outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={`${inputClassName} uppercase`}
               />
 
               {errors.code && (
@@ -287,7 +297,7 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
 
               {errors.email && (
@@ -316,7 +326,7 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
 
               {errors.phone && (
@@ -345,8 +355,14 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
+
+              {errors.city && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.city}
+                </p>
+              )}
             </div>
 
             <div>
@@ -368,8 +384,14 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
+
+              {errors.district && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.district}
+                </p>
+              )}
             </div>
 
             <div>
@@ -391,8 +413,14 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={inputClassName}
               />
+
+              {errors.postal_code && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.postal_code}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-6 pt-7">
@@ -431,6 +459,18 @@ function BranchForm({
               </label>
             </div>
 
+            {errors.is_head_office && (
+              <p className="text-sm text-red-600 md:col-span-2">
+                {errors.is_head_office}
+              </p>
+            )}
+
+            {errors.is_active && (
+              <p className="text-sm text-red-600 md:col-span-2">
+                {errors.is_active}
+              </p>
+            )}
+
             <div className="md:col-span-2">
               <label
                 htmlFor="branch-address"
@@ -451,7 +491,7 @@ function BranchForm({
                   )
                 }
                 disabled={isSaving}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-3 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className={textareaClassName}
               />
 
               {errors.address && (
@@ -467,7 +507,7 @@ function BranchForm({
               type="button"
               onClick={onCancel}
               disabled={isSaving}
-              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -475,7 +515,7 @@ function BranchForm({
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-400"
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
             >
               {isSaving
                 ? "Saving..."
@@ -502,10 +542,11 @@ export default function BranchesPage() {
     );
 
   const [search, setSearch] = useState("");
+
   const [activeFilter, setActiveFilter] =
-    useState<"all" | "active" | "inactive">(
-      "all"
-    );
+    useState<
+      "all" | "active" | "inactive"
+    >("all");
 
   const [editingBranch, setEditingBranch] =
     useState<Branch | null>(null);
@@ -520,6 +561,9 @@ export default function BranchesPage() {
     useState(false);
 
   const [deletingId, setDeletingId] =
+    useState<number | null>(null);
+
+  const [updatingId, setUpdatingId] =
     useState<number | null>(null);
 
   const [formErrors, setFormErrors] =
@@ -548,45 +592,6 @@ export default function BranchesPage() {
       (permission) =>
         permission.code === "branch.delete"
     ) ?? false;
-
-  useEffect(() => {
-    let isActive = true;
-
-    branchService
-      .getBranches({
-        page: 1,
-        per_page: 10,
-        sort_by: "name",
-        sort_direction: "asc",
-      })
-      .then((data) => {
-        if (!isActive) {
-          return;
-        }
-
-        setBranches(data.branches);
-        setPagination(data.pagination);
-      })
-      .catch((error: unknown) => {
-        if (isActive) {
-          setGeneralError(
-            getApiMessage(
-              error,
-              "Unable to load branches."
-            )
-          );
-        }
-      })
-      .finally(() => {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
 
   async function loadBranches(
     page = 1
@@ -624,6 +629,47 @@ export default function BranchesPage() {
     }
   }
 
+  useEffect(() => {
+    let isMounted = true;
+
+    branchService
+      .getBranches({
+        page: 1,
+        per_page: 10,
+        sort_by: "name",
+        sort_direction: "asc",
+      })
+      .then((data) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setBranches(data.branches);
+        setPagination(data.pagination);
+      })
+      .catch((error: unknown) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setGeneralError(
+          getApiMessage(
+            error,
+            "Unable to load branches."
+          )
+        );
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   async function handleSearch(
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
@@ -650,12 +696,23 @@ export default function BranchesPage() {
     setIsFormOpen(true);
   }
 
+  function closeForm(): void {
+    if (isSaving) {
+      return;
+    }
+
+    setIsFormOpen(false);
+    setEditingBranch(null);
+    setFormErrors({});
+  }
+
   async function handleSave(
     payload: BranchPayload
   ): Promise<void> {
     setIsSaving(true);
     setFormErrors({});
     setGeneralError(null);
+    setSuccessMessage(null);
 
     try {
       if (editingBranch) {
@@ -705,6 +762,7 @@ export default function BranchesPage() {
   async function handleStatusChange(
     branch: Branch
   ): Promise<void> {
+    setUpdatingId(branch.id);
     setGeneralError(null);
     setSuccessMessage(null);
 
@@ -732,6 +790,8 @@ export default function BranchesPage() {
           "Unable to update branch status."
         )
       );
+    } finally {
+      setUpdatingId(null);
     }
   }
 
@@ -759,8 +819,14 @@ export default function BranchesPage() {
         "Branch deleted successfully."
       );
 
+      const nextPage =
+        branches.length === 1 &&
+        pagination.current_page > 1
+          ? pagination.current_page - 1
+          : pagination.current_page;
+
       await Promise.all([
-        loadBranches(1),
+        loadBranches(nextPage),
         refreshUser(),
       ]);
     } catch (error) {
@@ -784,8 +850,8 @@ export default function BranchesPage() {
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            Manage company branches and branch-level
-            operational access.
+            Manage company branches and
+            branch-level operational access.
           </p>
         </div>
 
@@ -830,7 +896,7 @@ export default function BranchesPage() {
               setSearch(event.target.value)
             }
             placeholder="Search by name, code, city or district"
-            className="h-11 rounded-lg border border-slate-300 px-4 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+            className={inputClassName}
           />
 
           <select
@@ -843,14 +909,16 @@ export default function BranchesPage() {
                   | "inactive"
               )
             }
-            className="h-11 rounded-lg border border-slate-300 bg-white px-3 outline-none focus:border-emerald-600"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600"
           >
             <option value="all">
               All statuses
             </option>
+
             <option value="active">
               Active
             </option>
+
             <option value="inactive">
               Inactive
             </option>
@@ -859,7 +927,7 @@ export default function BranchesPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="h-11 rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:bg-slate-500"
+            className="h-11 rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-500"
           >
             Search
           </button>
@@ -931,9 +999,9 @@ export default function BranchesPage() {
 
                     <td className="px-5 py-4 text-sm text-slate-600">
                       <p>
-                        {branch.city ??
-                          "No city"}
+                        {branch.city ?? "No city"}
                       </p>
+
                       <p className="mt-1 text-xs text-slate-500">
                         {branch.district ??
                           "No district"}
@@ -944,6 +1012,7 @@ export default function BranchesPage() {
                       <p>
                         {branch.email ?? "—"}
                       </p>
+
                       <p className="mt-1">
                         {branch.phone ?? "—"}
                       </p>
@@ -982,7 +1051,13 @@ export default function BranchesPage() {
                                   branch
                                 )
                               }
-                              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              disabled={
+                                updatingId ===
+                                  branch.id ||
+                                deletingId ===
+                                  branch.id
+                              }
+                              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Edit
                             </button>
@@ -994,11 +1069,19 @@ export default function BranchesPage() {
                                   branch
                                 )
                               }
-                              className="rounded-md border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50"
+                              disabled={
+                                updatingId ===
+                                  branch.id ||
+                                deletingId ===
+                                  branch.id
+                              }
+                              className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              {branch.is_active
-                                ? "Deactivate"
-                                : "Activate"}
+                              {updatingId === branch.id
+                                ? "Updating..."
+                                : branch.is_active
+                                  ? "Deactivate"
+                                  : "Activate"}
                             </button>
                           </>
                         )}
@@ -1014,12 +1097,13 @@ export default function BranchesPage() {
                               }
                               disabled={
                                 deletingId ===
-                                branch.id
+                                  branch.id ||
+                                updatingId ===
+                                  branch.id
                               }
-                              className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              {deletingId ===
-                              branch.id
+                              {deletingId === branch.id
                                 ? "Deleting..."
                                 : "Delete"}
                             </button>
@@ -1052,13 +1136,14 @@ export default function BranchesPage() {
                   pagination.current_page - 1
                 )
               }
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
 
             <span className="flex items-center px-3 text-sm text-slate-600">
-              Page {pagination.current_page} of{" "}
+              Page{" "}
+              {pagination.current_page} of{" "}
               {pagination.last_page}
             </span>
 
@@ -1074,7 +1159,7 @@ export default function BranchesPage() {
                   pagination.current_page + 1
                 )
               }
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -1091,12 +1176,7 @@ export default function BranchesPage() {
           branch={editingBranch}
           isSaving={isSaving}
           errors={formErrors}
-          onCancel={() => {
-            if (!isSaving) {
-              setIsFormOpen(false);
-              setEditingBranch(null);
-            }
-          }}
+          onCancel={closeForm}
           onSubmit={handleSave}
         />
       )}
