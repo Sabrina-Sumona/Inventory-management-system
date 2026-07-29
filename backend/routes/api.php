@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\CompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\WarehouseController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -68,4 +69,23 @@ Route::middleware('auth:sanctum')->group(function (): void {
             'restore',
         ]
     )->whereNumber('branch');
+
+    Route::post(
+        '/warehouses/{warehouse}/restore',
+        [
+            WarehouseController::class,
+            'restore',
+        ]
+    )->whereNumber('warehouse');
+
+    Route::apiResource(
+        'warehouses',
+        WarehouseController::class
+    )->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
 });
