@@ -2,6 +2,7 @@
 
 import {
   type FormEvent,
+  useMemo,
   useState,
 } from "react";
 
@@ -64,7 +65,9 @@ function warehouseToForm(
   warehouse: Warehouse | null
 ): WarehouseFormValues {
   if (!warehouse) {
-    return emptyForm;
+    return {
+      ...emptyForm,
+    };
   }
 
   return {
@@ -95,6 +98,50 @@ export function WarehouseForm({
       warehouseToForm(warehouse)
     );
 
+  const availableBranches =
+    useMemo<Branch[]>(() => {
+      if (!warehouse) {
+        return branches;
+      }
+
+      const existingBranchIsAvailable =
+        branches.some(
+          (branch) =>
+            branch.id === warehouse.branch_id
+        );
+
+      if (existingBranchIsAvailable) {
+        return branches;
+      }
+
+      const currentBranch: Branch = {
+        id: warehouse.branch.id,
+        company_id: warehouse.company_id,
+        name: warehouse.branch.name,
+        code: warehouse.branch.code,
+        email: null,
+        phone: null,
+        address: null,
+        city: null,
+        district: null,
+        postal_code: null,
+        is_head_office:
+          warehouse.branch.is_head_office,
+        is_active: true,
+        company: warehouse.company,
+        warehouses_count: 0,
+        users_count: 0,
+        created_at: null,
+        updated_at: null,
+        deleted_at: null,
+      };
+
+      return [
+        currentBranch,
+        ...branches,
+      ];
+    }, [branches, warehouse]);
+
   function updateField<
     Key extends keyof WarehouseFormValues
   >(
@@ -114,7 +161,10 @@ export function WarehouseForm({
 
     const branchId = Number(form.branchId);
 
-    if (!Number.isInteger(branchId)) {
+    if (
+      !Number.isInteger(branchId) ||
+      branchId <= 0
+    ) {
       return;
     }
 
@@ -129,7 +179,9 @@ export function WarehouseForm({
       phone: nullableValue(form.phone),
       address: nullableValue(form.address),
       city: nullableValue(form.city),
-      district: nullableValue(form.district),
+      district: nullableValue(
+        form.district
+      ),
       postal_code: nullableValue(
         form.postalCode
       ),
@@ -161,7 +213,7 @@ export function WarehouseForm({
             onClick={onCancel}
             disabled={isSaving}
             aria-label="Close warehouse form"
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             ✕
           </button>
@@ -191,25 +243,41 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               >
-                <option value="">
+                <option
+                  value=""
+                  disabled
+                >
                   Select a branch
                 </option>
 
-                {branches.map((branch) => (
-                  <option
-                    key={branch.id}
-                    value={branch.id}
-                  >
-                    {branch.name} ({branch.code})
-                  </option>
-                ))}
+                {availableBranches.map(
+                  (branch) => (
+                    <option
+                      key={branch.id}
+                      value={branch.id}
+                    >
+                      {branch.name} (
+                      {branch.code})
+                    </option>
+                  )
+                )}
               </select>
 
               {errors.branch_id && (
                 <p className="mt-2 text-sm text-red-600">
                   {errors.branch_id}
+                </p>
+              )}
+
+              {availableBranches.length ===
+                0 && (
+                <p className="mt-2 text-sm text-amber-700">
+                  No accessible active branches
+                  were found. Assign the user to
+                  an active branch before creating
+                  a warehouse.
                 </p>
               )}
             </div>
@@ -234,7 +302,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.name && (
@@ -265,7 +333,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 uppercase outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 uppercase outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.code && (
@@ -295,7 +363,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.email && (
@@ -324,7 +392,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.phone && (
@@ -353,7 +421,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.city && (
@@ -382,7 +450,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.district && (
@@ -411,7 +479,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="h-11 w-full rounded-lg border border-slate-300 px-3.5 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.postal_code && (
@@ -427,17 +495,16 @@ export function WarehouseForm({
                   type="checkbox"
                   checked={form.isPrimary}
                   onChange={(event) => {
-                    updateField(
-                      "isPrimary",
-                      event.target.checked
-                    );
+                    const isPrimary =
+                      event.target.checked;
 
-                    if (event.target.checked) {
-                      updateField(
-                        "isActive",
-                        true
-                      );
-                    }
+                    setForm((current) => ({
+                      ...current,
+                      isPrimary,
+                      isActive: isPrimary
+                        ? true
+                        : current.isActive,
+                    }));
                   }}
                   disabled={isSaving}
                   className="h-4 w-4 rounded border-slate-300"
@@ -457,7 +524,8 @@ export function WarehouseForm({
                     )
                   }
                   disabled={
-                    isSaving || form.isPrimary
+                    isSaving ||
+                    form.isPrimary
                   }
                   className="h-4 w-4 rounded border-slate-300"
                 />
@@ -465,6 +533,12 @@ export function WarehouseForm({
                 Active
               </label>
             </div>
+
+            {errors.is_primary && (
+              <p className="text-sm text-red-600 md:col-span-2">
+                {errors.is_primary}
+              </p>
+            )}
 
             {errors.is_active && (
               <p className="text-sm text-red-600 md:col-span-2">
@@ -492,7 +566,7 @@ export function WarehouseForm({
                   )
                 }
                 disabled={isSaving}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-3 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+                className="w-full rounded-lg border border-slate-300 px-3.5 py-3 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100"
               />
 
               {errors.address && (
@@ -508,7 +582,7 @@ export function WarehouseForm({
               type="button"
               onClick={onCancel}
               disabled={isSaving}
-              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -517,9 +591,11 @@ export function WarehouseForm({
               type="submit"
               disabled={
                 isSaving ||
-                branches.length === 0
+                availableBranches.length ===
+                  0 ||
+                form.branchId === ""
               }
-              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
             >
               {isSaving
                 ? "Saving..."
