@@ -83,10 +83,7 @@ class WarehouseController extends Controller
                 'company',
                 'branch',
             ])
-            ->withCount([
-                'locations',
-                'users',
-            ])
+            ->withCount('users')
             ->when(
                 $search,
                 function ($query, string $search): void {
@@ -231,10 +228,6 @@ class WarehouseController extends Controller
                     ] ?? true,
                 ]);
 
-                /*
-                 * Ensure the creator can immediately
-                 * access the new warehouse.
-                 */
                 $user->assignWarehouse(
                     warehouse: $warehouse,
                     isPrimary: $isPrimary,
@@ -250,10 +243,7 @@ class WarehouseController extends Controller
                 'company',
                 'branch',
             ])
-            ->loadCount([
-                'locations',
-                'users',
-            ]);
+            ->loadCount('users');
 
         return response()->json([
             'success' => true,
@@ -277,10 +267,7 @@ class WarehouseController extends Controller
                 'company',
                 'branch',
             ])
-            ->loadCount([
-                'locations',
-                'users',
-            ]);
+            ->loadCount('users');
 
         return response()->json([
             'success' => true,
@@ -352,10 +339,7 @@ class WarehouseController extends Controller
                 'company',
                 'branch',
             ])
-            ->loadCount([
-                'locations',
-                'users',
-            ]);
+            ->loadCount('users');
 
         return response()->json([
             'success' => true,
@@ -378,14 +362,6 @@ class WarehouseController extends Controller
             throw ValidationException::withMessages([
                 'warehouse' => [
                     'The primary warehouse cannot be deleted.',
-                ],
-            ]);
-        }
-
-        if ($warehouse->locations()->exists()) {
-            throw ValidationException::withMessages([
-                'warehouse' => [
-                    'A warehouse containing locations cannot be deleted.',
                 ],
             ]);
         }
@@ -415,10 +391,7 @@ class WarehouseController extends Controller
                 'company',
                 'branch',
             ])
-            ->loadCount([
-                'locations',
-                'users',
-            ]);
+            ->loadCount('users');
 
         return response()->json([
             'success' => true,

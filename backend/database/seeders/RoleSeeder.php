@@ -11,15 +11,18 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        $company = Company::where('code', 'DESH-SOLAR')
-            ->firstOrFail();
+        $company = Company::where(
+            'code',
+            'DESH-SOLAR'
+        )->firstOrFail();
 
         $roles = [
             [
                 'company_id' => null,
                 'name' => 'Super Admin',
                 'code' => 'SUPER-ADMIN',
-                'description' => 'Global administrator with complete system access.',
+                'description' =>
+                    'Global administrator with complete system access.',
                 'is_system' => true,
                 'permissions' => '*',
             ],
@@ -27,7 +30,8 @@ class RoleSeeder extends Seeder
                 'company_id' => $company->id,
                 'name' => 'Company Admin',
                 'code' => 'DESH-SOLAR-COMPANY-ADMIN',
-                'description' => 'Manages Desh Solar organization and users.',
+                'description' =>
+                    'Manages Desh Solar organization, warehouses, users, and access control.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -42,11 +46,6 @@ class RoleSeeder extends Seeder
                     'warehouse.create',
                     'warehouse.update',
                     'warehouse.delete',
-
-                    'warehouse-location.view',
-                    'warehouse-location.create',
-                    'warehouse-location.update',
-                    'warehouse-location.delete',
 
                     'user.view',
                     'user.create',
@@ -65,7 +64,8 @@ class RoleSeeder extends Seeder
                 'company_id' => $company->id,
                 'name' => 'Inventory Manager',
                 'code' => 'DESH-SOLAR-INVENTORY-MANAGER',
-                'description' => 'Manages inventory and warehouse structures.',
+                'description' =>
+                    'Manages inventory operations and warehouse records.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -75,10 +75,6 @@ class RoleSeeder extends Seeder
                     'warehouse.create',
                     'warehouse.update',
 
-                    'warehouse-location.view',
-                    'warehouse-location.create',
-                    'warehouse-location.update',
-
                     'user.view',
                     'role.view',
                 ],
@@ -87,49 +83,47 @@ class RoleSeeder extends Seeder
                 'company_id' => $company->id,
                 'name' => 'Warehouse Manager',
                 'code' => 'DESH-SOLAR-WAREHOUSE-MANAGER',
-                'description' => 'Manages warehouse and storage-location operations.',
+                'description' =>
+                    'Manages assigned warehouse operations.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
                     'branch.view',
                     'warehouse.view',
                     'warehouse.update',
-
-                    'warehouse-location.view',
-                    'warehouse-location.create',
-                    'warehouse-location.update',
                 ],
             ],
             [
                 'company_id' => $company->id,
                 'name' => 'Storekeeper',
                 'code' => 'DESH-SOLAR-STOREKEEPER',
-                'description' => 'Handles day-to-day warehouse storage operations.',
+                'description' =>
+                    'Handles day-to-day warehouse inventory operations.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
                     'branch.view',
                     'warehouse.view',
-                    'warehouse-location.view',
                 ],
             ],
             [
                 'company_id' => $company->id,
                 'name' => 'Viewer',
                 'code' => 'DESH-SOLAR-VIEWER',
-                'description' => 'Read-only access to permitted organization records.',
+                'description' =>
+                    'Read-only access to permitted organization records.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
                     'branch.view',
                     'warehouse.view',
-                    'warehouse-location.view',
                 ],
             ],
         ];
 
         foreach ($roles as $roleData) {
-            $permissionCodes = $roleData['permissions'];
+            $permissionCodes =
+                $roleData['permissions'];
 
             unset($roleData['permissions']);
 
@@ -143,18 +137,30 @@ class RoleSeeder extends Seeder
                 ]
             );
 
-            $permissionIds = $permissionCodes === '*'
-                ? Permission::query()
-                    ->where('is_active', true)
-                    ->pluck('id')
-                    ->all()
-                : Permission::query()
-                    ->whereIn('code', $permissionCodes)
-                    ->where('is_active', true)
-                    ->pluck('id')
-                    ->all();
+            $permissionIds =
+                $permissionCodes === '*'
+                    ? Permission::query()
+                        ->where(
+                            'is_active',
+                            true
+                        )
+                        ->pluck('id')
+                        ->all()
+                    : Permission::query()
+                        ->whereIn(
+                            'code',
+                            $permissionCodes
+                        )
+                        ->where(
+                            'is_active',
+                            true
+                        )
+                        ->pluck('id')
+                        ->all();
 
-            $role->permissions()->sync($permissionIds);
+            $role->permissions()->sync(
+                $permissionIds
+            );
         }
     }
 }

@@ -3,11 +3,10 @@
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
-use App\Http\Controllers\Api\CompanyController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\WarehouseController;
-use App\Http\Controllers\Api\WarehouseLocationController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
     return response()->json([
@@ -36,7 +35,10 @@ Route::post('/auth/reset-password', [
 ])->middleware('throttle:password-reset');
 
 Route::middleware('auth:sanctum')->group(function (): void {
-    Route::get('/auth/user', CurrentUserController::class);
+    Route::get(
+        '/auth/user',
+        CurrentUserController::class
+    );
 
     Route::post('/auth/logout', [
         AuthenticatedSessionController::class,
@@ -89,25 +91,4 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'update',
         'destroy',
     ]);
-
-    Route::post(
-    '/warehouse-locations/{warehouseLocation}/restore',
-    [
-        WarehouseLocationController::class,
-        'restore',
-    ]
-)->whereNumber('warehouseLocation');
-
-Route::apiResource(
-    'warehouse-locations',
-    WarehouseLocationController::class
-)->parameters([
-    'warehouse-locations' => 'warehouseLocation',
-])->only([
-    'index',
-    'store',
-    'show',
-    'update',
-    'destroy',
-]);
 });

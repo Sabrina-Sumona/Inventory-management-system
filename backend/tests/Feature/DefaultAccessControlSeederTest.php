@@ -16,7 +16,7 @@ class DefaultAccessControlSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseCount('permissions', 23);
+        $this->assertDatabaseCount('permissions', 19);
         $this->assertDatabaseCount('roles', 6);
 
         $this->assertDatabaseHas('roles', [
@@ -36,14 +36,20 @@ class DefaultAccessControlSeederTest extends TestCase
             'module' => 'warehouse',
             'action' => 'view',
         ]);
+
+        $this->assertDatabaseMissing('permissions', [
+            'module' => 'warehouse-location',
+        ]);
     }
 
     public function test_super_admin_receives_every_permission(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $superAdmin = Role::where('code', 'SUPER-ADMIN')
-            ->firstOrFail();
+        $superAdmin = Role::where(
+            'code',
+            'SUPER-ADMIN'
+        )->firstOrFail();
 
         $this->assertSame(
             Permission::count(),
@@ -65,7 +71,7 @@ class DefaultAccessControlSeederTest extends TestCase
         );
 
         $this->assertTrue(
-            $role->hasPermission('warehouse-location.update')
+            $role->hasPermission('warehouse.update')
         );
 
         $this->assertFalse(
@@ -75,6 +81,12 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->assertFalse(
             $role->hasPermission('warehouse.delete')
         );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'warehouse-location.update'
+            )
+        );
     }
 
     public function test_seeders_can_run_more_than_once_without_duplicates(): void
@@ -82,7 +94,7 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseCount('permissions', 23);
+        $this->assertDatabaseCount('permissions', 19);
         $this->assertDatabaseCount('roles', 6);
 
         $warehouseViewPermission = Permission::where(
@@ -98,6 +110,10 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->assertDatabaseHas('role_permission', [
             'role_id' => $warehouseManager->id,
             'permission_id' => $warehouseViewPermission->id,
+        ]);
+
+        $this->assertDatabaseMissing('permissions', [
+            'module' => 'warehouse-location',
         ]);
     }
 }

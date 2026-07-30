@@ -2,14 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Http\Requests\StoreWarehouseLocationRequest;
 use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Warehouse;
-use App\Models\WarehouseLocation;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class OrganizationStructureTest extends TestCase
@@ -20,131 +17,143 @@ class OrganizationStructureTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $company = Company::where('code', 'DESH-SOLAR')->first();
-
-        $this->assertNotNull($company);
-        $this->assertSame('Desh Solar', $company->name);
-        $this->assertSame('https://deshsolar.com/', $company->website);
-
-        $branch = Branch::where('code', 'HEAD-OFFICE')->first();
-
-        $this->assertNotNull($branch);
-        $this->assertTrue($branch->company->is($company));
-
-        $warehouse = Warehouse::where('code', 'MAIN-WAREHOUSE')->first();
-
-        $this->assertNotNull($warehouse);
-        $this->assertTrue($warehouse->company->is($company));
-        $this->assertTrue($warehouse->branch->is($branch));
+        $company = Company::where(
+            'code',
+            'DESH-SOLAR'
+        )->firstOrFail();
 
         $this->assertSame(
-            4,
-            WarehouseLocation::where(
-                'warehouse_id',
-                $warehouse->id
+            'Desh Solar',
+            $company->name
+        );
+
+        $this->assertSame(
+            'https://deshsolar.com/',
+            $company->website
+        );
+
+        $branch = Branch::where(
+            'code',
+            'HEAD-OFFICE'
+        )->firstOrFail();
+
+        $this->assertSame(
+            'Desh Solar Head Office',
+            $branch->name
+        );
+
+        $this->assertTrue(
+            $branch->company->is($company)
+        );
+
+        $warehouse = Warehouse::where(
+            'code',
+            'MAIN-WAREHOUSE'
+        )->firstOrFail();
+
+        $this->assertSame(
+            'Desh Solar Main Warehouse',
+            $warehouse->name
+        );
+
+        $this->assertTrue(
+            $warehouse->company->is($company)
+        );
+
+        $this->assertTrue(
+            $warehouse->branch->is($branch)
+        );
+    }
+
+    public function test_head_office_belongs_to_desh_solar(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $company = Company::where(
+            'code',
+            'DESH-SOLAR'
+        )->firstOrFail();
+
+        $branch = Branch::where(
+            'code',
+            'HEAD-OFFICE'
+        )->firstOrFail();
+
+        $this->assertSame(
+            $company->id,
+            $branch->company_id
+        );
+
+        $this->assertTrue(
+            $branch->is_head_office
+        );
+
+        $this->assertTrue(
+            $branch->is_active
+        );
+    }
+
+    public function test_main_warehouse_belongs_to_head_office(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $company = Company::where(
+            'code',
+            'DESH-SOLAR'
+        )->firstOrFail();
+
+        $branch = Branch::where(
+            'code',
+            'HEAD-OFFICE'
+        )->firstOrFail();
+
+        $warehouse = Warehouse::where(
+            'code',
+            'MAIN-WAREHOUSE'
+        )->firstOrFail();
+
+        $this->assertSame(
+            $company->id,
+            $warehouse->company_id
+        );
+
+        $this->assertSame(
+            $branch->id,
+            $warehouse->branch_id
+        );
+
+        $this->assertTrue(
+            $warehouse->is_primary
+        );
+
+        $this->assertTrue(
+            $warehouse->is_active
+        );
+    }
+
+    public function test_seeded_organization_has_one_branch_and_one_warehouse(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $company = Company::where(
+            'code',
+            'DESH-SOLAR'
+        )->firstOrFail();
+
+        $this->assertSame(
+            1,
+            Branch::where(
+                'company_id',
+                $company->id
             )->count()
         );
-    }
 
-    public function test_warehouse_location_hierarchy_is_correct(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        $bin = WarehouseLocation::with(
-            'parent.parent.parent'
-        )
-            ->where('code', 'BIN-A1-01-01')
-            ->firstOrFail();
-
-        $this->assertSame('bin', $bin->type);
-        $this->assertSame('Shelf A1-01', $bin->parent->name);
         $this->assertSame(
-            'Solar Panel Rack A1',
-            $bin->parent->parent->name
-        );
-        $this->assertSame(
-            'Main Storage Zone',
-            $bin->parent->parent->parent->name
-        );
-    }
-
-    public function test_invalid_warehouse_location_type_is_rejected(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        $company = Company::where('code', 'DESH-SOLAR')
-            ->firstOrFail();
-
-        $branch = Branch::where('code', 'HEAD-OFFICE')
-            ->firstOrFail();
-
-        $warehouse = Warehouse::where('code', 'MAIN-WAREHOUSE')
-            ->firstOrFail();
-
-        $request = StoreWarehouseLocationRequest::create(
-            '/api/warehouse-locations',
-            'POST',
-            [
-                'company_id' => $company->id,
-                'branch_id' => $branch->id,
-                'warehouse_id' => $warehouse->id,
-                'parent_id' => null,
-                'name' => 'Invalid Location',
-                'code' => 'INVALID-LOCATION',
-                'type' => 'room',
-                'is_active' => true,
-            ]
-        );
-
-        $validator = Validator::make(
-            $request->all(),
-            $request->rules()
-        );
-
-        $this->assertTrue($validator->fails());
-        $this->assertArrayHasKey(
-            'type',
-            $validator->errors()->toArray()
-        );
-    }
-
-    public function test_location_code_must_be_unique_inside_a_warehouse(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        $company = Company::where('code', 'DESH-SOLAR')
-            ->firstOrFail();
-
-        $branch = Branch::where('code', 'HEAD-OFFICE')
-            ->firstOrFail();
-
-        $warehouse = Warehouse::where('code', 'MAIN-WAREHOUSE')
-            ->firstOrFail();
-
-        $request = StoreWarehouseLocationRequest::create(
-            '/api/warehouse-locations',
-            'POST',
-            [
-                'company_id' => $company->id,
-                'branch_id' => $branch->id,
-                'warehouse_id' => $warehouse->id,
-                'parent_id' => null,
-                'name' => 'Duplicate Zone',
-                'code' => 'ZONE-A',
-                'type' => 'zone',
-                'is_active' => true,
-            ]
-        );
-
-        $validator = Validator::make(
-            $request->all(),
-            $request->rules()
-        );
-
-        $this->assertTrue($validator->fails());
-        $this->assertArrayHasKey(
-            'code',
-            $validator->errors()->toArray()
+            1,
+            Warehouse::where(
+                'company_id',
+                $company->id
+            )->count()
         );
     }
 }

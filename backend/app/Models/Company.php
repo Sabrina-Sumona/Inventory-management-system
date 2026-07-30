@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
@@ -42,11 +42,6 @@ class Company extends Model
         return $this->hasMany(Warehouse::class);
     }
 
-    public function warehouseLocations(): HasMany
-    {
-        return $this->hasMany(WarehouseLocation::class);
-    }
-
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -67,5 +62,4 @@ class Company extends Model
 
         return $query->whereKey($user->company_id);
     }
-
 }

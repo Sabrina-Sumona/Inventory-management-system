@@ -576,33 +576,6 @@ class WarehouseManagementTest extends TestCase
         $this->assertNotSoftDeleted($warehouse);
     }
 
-    public function test_warehouse_containing_locations_cannot_be_deleted(): void
-    {
-        $warehouse = $this->mainWarehouse();
-
-        $warehouse->update([
-            'is_primary' => false,
-        ]);
-
-        $this->assertTrue(
-            $warehouse->locations()->exists()
-        );
-
-        Sanctum::actingAs(
-            $this->companyAdmin()
-        );
-
-        $this->deleteJson(
-            "/api/warehouses/{$warehouse->id}"
-        )
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors([
-                'warehouse',
-            ]);
-
-        $this->assertNotSoftDeleted($warehouse);
-    }
-
     public function test_company_admin_can_restore_deleted_warehouse(): void
     {
         $admin = $this->companyAdmin();

@@ -86,36 +86,6 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete warehouse records.',
             ],
 
-            // Warehouse locations
-            [
-                'name' => 'View Warehouse Locations',
-                'code' => 'warehouse-location.view',
-                'module' => 'warehouse-location',
-                'action' => 'view',
-                'description' => 'View warehouse locations.',
-            ],
-            [
-                'name' => 'Create Warehouse Locations',
-                'code' => 'warehouse-location.create',
-                'module' => 'warehouse-location',
-                'action' => 'create',
-                'description' => 'Create warehouse locations.',
-            ],
-            [
-                'name' => 'Update Warehouse Locations',
-                'code' => 'warehouse-location.update',
-                'module' => 'warehouse-location',
-                'action' => 'update',
-                'description' => 'Update warehouse locations.',
-            ],
-            [
-                'name' => 'Delete Warehouse Locations',
-                'code' => 'warehouse-location.delete',
-                'module' => 'warehouse-location',
-                'action' => 'delete',
-                'description' => 'Delete warehouse locations.',
-            ],
-
             // Users
             [
                 'name' => 'View Users',
@@ -196,5 +166,9 @@ class PermissionSeeder extends Seeder
                 ]
             );
         }
+
+        Permission::query()
+            ->where('module', 'warehouse-location')
+            ->delete();
     }
 }

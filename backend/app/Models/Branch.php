@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Branch extends Model
 {
@@ -47,11 +47,6 @@ class Branch extends Model
         return $this->hasMany(Warehouse::class);
     }
 
-    public function warehouseLocations(): HasMany
-    {
-        return $this->hasMany(WarehouseLocation::class);
-    }
-
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -78,12 +73,17 @@ class Branch extends Model
         }
 
         return $query
-            ->where('branches.company_id', $user->company_id)
+            ->where(
+                'branches.company_id',
+                $user->company_id
+            )
             ->whereHas(
                 'users',
                 fn (Builder $userQuery) => $userQuery
-                    ->where('users.id', $user->id)
+                    ->where(
+                        'users.id',
+                        $user->id
+                    )
             );
     }
-
 }

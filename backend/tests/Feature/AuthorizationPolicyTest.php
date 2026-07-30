@@ -7,7 +7,6 @@ use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Warehouse;
-use App\Models\WarehouseLocation;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -142,45 +141,6 @@ class AuthorizationPolicyTest extends TestCase
             Gate::forUser($user)->allows(
                 'view',
                 $warehouse
-            )
-        );
-    }
-
-    public function test_warehouse_location_requires_warehouse_access(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        $company = Company::where(
-            'code',
-            'DESH-SOLAR'
-        )->firstOrFail();
-
-        $branch = Branch::where(
-            'code',
-            'HEAD-OFFICE'
-        )->firstOrFail();
-
-        $location = WarehouseLocation::where(
-            'code',
-            'ZONE-A'
-        )->firstOrFail();
-
-        $viewerRole = Role::where(
-            'code',
-            'DESH-SOLAR-VIEWER'
-        )->firstOrFail();
-
-        $user = User::factory()->create([
-            'company_id' => $company->id,
-        ]);
-
-        $user->assignRole($viewerRole);
-        $user->assignBranch($branch);
-
-        $this->assertFalse(
-            Gate::forUser($user)->allows(
-                'view',
-                $location
             )
         );
     }
