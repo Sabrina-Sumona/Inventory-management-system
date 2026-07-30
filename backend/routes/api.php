@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\UserAssignmentController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,4 +93,36 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'update',
         'destroy',
     ]);
+
+    Route::apiResource(
+        'users',
+        UserController::class
+    )->only([
+        'index',
+        'show',
+    ]);
+
+    Route::get(
+        '/users/{user}/assignments',
+        [
+            UserAssignmentController::class,
+            'show',
+        ]
+    )->whereNumber('user');
+
+    Route::put(
+        '/users/{user}/branch-assignments',
+        [
+            UserAssignmentController::class,
+            'syncBranches',
+        ]
+    )->whereNumber('user');
+
+    Route::put(
+        '/users/{user}/warehouse-assignments',
+        [
+            UserAssignmentController::class,
+            'syncWarehouses',
+        ]
+    )->whereNumber('user');
 });

@@ -17,7 +17,8 @@ type NavigationIconName =
   | "dashboard"
   | "company"
   | "branch"
-  | "warehouse";
+  | "warehouse"
+  | "users";
 
 interface NavigationItem {
   label: string;
@@ -53,6 +54,12 @@ const navigationItems: NavigationItem[] = [
     href: "/dashboard/warehouses",
     permission: "warehouse.view",
     icon: "warehouse",
+  },
+  {
+    label: "User Assignments",
+    href: "/dashboard/user-assignments",
+    permission: "user.view",
+    icon: "users",
   },
 ];
 
@@ -164,6 +171,32 @@ function NavigationIcon({
         <path d="M3 21V8l9-5 9 5v13" />
         <path d="M7 21v-8h10v8M7 10h10" />
         <path d="M10 17h4" />
+      </svg>
+    );
+  }
+
+  if (name === "users") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        className="h-5 w-5"
+        aria-hidden="true"
+      >
+        <circle
+          cx="9"
+          cy="8"
+          r="3"
+        />
+        <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+        <circle
+          cx="17"
+          cy="9"
+          r="2.5"
+        />
+        <path d="M15.5 14.5A5 5 0 0 1 21 20" />
       </svg>
     );
   }
