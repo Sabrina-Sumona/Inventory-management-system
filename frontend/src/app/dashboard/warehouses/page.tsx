@@ -561,7 +561,6 @@ export default function WarehousesPage() {
                   "Branch",
                   "Location",
                   "Contact",
-                  "Locations",
                   "Users",
                   "Status",
                   "Actions",
@@ -580,7 +579,7 @@ export default function WarehousesPage() {
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="px-5 py-12 text-center text-sm text-slate-500"
                   >
                     Loading warehouses...
@@ -589,7 +588,7 @@ export default function WarehousesPage() {
               ) : warehouses.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="px-5 py-12 text-center text-sm text-slate-500"
                   >
                     No warehouses found.
@@ -655,10 +654,6 @@ export default function WarehousesPage() {
                         <p className="mt-1">
                           {warehouse.phone ?? "—"}
                         </p>
-                      </td>
-
-                      <td className="px-5 py-4 text-sm font-semibold text-slate-700">
-                        {warehouse.locations_count}
                       </td>
 
                       <td className="px-5 py-4 text-sm font-semibold text-slate-700">
