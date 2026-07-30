@@ -78,10 +78,34 @@ function NavigationIcon({
         className="h-5 w-5"
         aria-hidden="true"
       >
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
+        <rect
+          x="3"
+          y="3"
+          width="7"
+          height="7"
+          rx="1"
+        />
+        <rect
+          x="14"
+          y="3"
+          width="7"
+          height="7"
+          rx="1"
+        />
+        <rect
+          x="3"
+          y="14"
+          width="7"
+          height="7"
+          rx="1"
+        />
+        <rect
+          x="14"
+          y="14"
+          width="7"
+          height="7"
+          rx="1"
+        />
       </svg>
     );
   }
@@ -113,9 +137,21 @@ function NavigationIcon({
         className="h-5 w-5"
         aria-hidden="true"
       >
-        <circle cx="6" cy="5" r="2" />
-        <circle cx="18" cy="7" r="2" />
-        <circle cx="18" cy="17" r="2" />
+        <circle
+          cx="6"
+          cy="5"
+          r="2"
+        />
+        <circle
+          cx="18"
+          cy="7"
+          r="2"
+        />
+        <circle
+          cx="18"
+          cy="17"
+          r="2"
+        />
         <path d="M8 5h3a3 3 0 0 1 3 3v6a3 3 0 0 0 3 3" />
         <path d="M14 10a3 3 0 0 1 3-3" />
       </svg>
@@ -149,7 +185,11 @@ function NavigationIcon({
       aria-hidden="true"
     >
       <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-      <circle cx="12" cy="10" r="2.5" />
+      <circle
+        cx="12"
+        cy="10"
+        r="2.5"
+      />
     </svg>
   );
 }
@@ -234,7 +274,9 @@ export function DashboardShell({
         <button
           type="button"
           aria-label="Close navigation"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() =>
+            setIsSidebarOpen(false)
+          }
           className="fixed inset-0 z-40 bg-slate-950/50 lg:hidden"
         />
       )}
@@ -249,7 +291,9 @@ export function DashboardShell({
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-5">
           <Link
             href="/dashboard"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={() =>
+              setIsSidebarOpen(false)
+            }
             className="flex items-center gap-3"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500 font-bold text-white">
@@ -270,7 +314,9 @@ export function DashboardShell({
           <button
             type="button"
             aria-label="Close sidebar"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={() =>
+              setIsSidebarOpen(false)
+            }
             className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white lg:hidden"
           >
             <svg
@@ -295,28 +341,34 @@ export function DashboardShell({
             aria-label="Dashboard navigation"
             className="mt-3 space-y-1"
           >
-            {visibleNavigationItems.map((item) => {
-              const active = isActive(item.href);
+            {visibleNavigationItems.map(
+              (item) => {
+                const active = isActive(
+                  item.href
+                );
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() =>
-                    setIsSidebarOpen(false)
-                  }
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-                    active
-                      ? "bg-emerald-500 text-white"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <NavigationIcon name={item.icon} />
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() =>
+                      setIsSidebarOpen(false)
+                    }
+                    className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
+                      active
+                        ? "bg-emerald-500 text-white"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <NavigationIcon
+                      name={item.icon}
+                    />
 
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              }
+            )}
           </nav>
         </div>
 
@@ -324,7 +376,9 @@ export function DashboardShell({
           <div className="rounded-xl bg-slate-900 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 font-semibold text-white">
-                {user.name.charAt(0).toUpperCase()}
+                {user.name
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div className="min-w-0">
@@ -364,7 +418,9 @@ export function DashboardShell({
               <button
                 type="button"
                 aria-label="Open sidebar"
-                onClick={() => setIsSidebarOpen(true)}
+                onClick={() =>
+                  setIsSidebarOpen(true)
+                }
                 className="rounded-lg border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-100 lg:hidden"
               >
                 <svg
@@ -403,7 +459,9 @@ export function DashboardShell({
               </div>
 
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-800">
-                {user.name.charAt(0).toUpperCase()}
+                {user.name
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
             </div>
           </div>
