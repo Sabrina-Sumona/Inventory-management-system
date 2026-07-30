@@ -7,8 +7,9 @@ use App\Models\WarehouseLocation;
 
 class WarehouseLocationPolicy
 {
-    public function viewAny(User $user): bool
-    {
+    public function viewAny(
+        User $user
+    ): bool {
         return $user->hasPermission(
             'warehouse-location.view'
         );
@@ -25,11 +26,12 @@ class WarehouseLocationPolicy
         );
     }
 
-    public function create(User $user): bool
-    {
+    public function create(
+        User $user
+    ): bool {
         return $user->hasPermission(
             'warehouse-location.create'
-        );
+        ) && $user->company_id !== null;
     }
 
     public function update(

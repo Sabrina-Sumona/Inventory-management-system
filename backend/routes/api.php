@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\WarehouseController;
+use App\Http\Controllers\Api\WarehouseLocationController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -88,4 +89,25 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'update',
         'destroy',
     ]);
+
+    Route::post(
+    '/warehouse-locations/{warehouseLocation}/restore',
+    [
+        WarehouseLocationController::class,
+        'restore',
+    ]
+)->whereNumber('warehouseLocation');
+
+Route::apiResource(
+    'warehouse-locations',
+    WarehouseLocationController::class
+)->parameters([
+    'warehouse-locations' => 'warehouseLocation',
+])->only([
+    'index',
+    'store',
+    'show',
+    'update',
+    'destroy',
+]);
 });
