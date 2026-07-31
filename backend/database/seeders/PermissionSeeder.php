@@ -86,6 +86,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete warehouse records.',
             ],
 
+            // Supplier
+            [
+                'name' => 'View Suppliers',
+                'code' => 'supplier.view',
+                'module' => 'supplier',
+                'action' => 'view',
+                'description' => 'View supplier records.',
+            ],
+            [
+                'name' => 'Create Suppliers',
+                'code' => 'supplier.create',
+                'module' => 'supplier',
+                'action' => 'create',
+                'description' => 'Create new suppliers.',
+            ],
+            [
+                'name' => 'Update Suppliers',
+                'code' => 'supplier.update',
+                'module' => 'supplier',
+                'action' => 'update',
+                'description' => 'Update supplier records.',
+            ],
+            [
+                'name' => 'Delete Suppliers',
+                'code' => 'supplier.delete',
+                'module' => 'supplier',
+                'action' => 'delete',
+                'description' => 'Delete supplier records.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',

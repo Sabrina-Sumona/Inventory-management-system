@@ -16,8 +16,15 @@ class DefaultAccessControlSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseCount('permissions', 19);
-        $this->assertDatabaseCount('roles', 6);
+        $this->assertDatabaseCount(
+            'permissions',
+            23
+        );
+
+        $this->assertDatabaseCount(
+            'roles',
+            6
+        );
 
         $this->assertDatabaseHas('roles', [
             'code' => 'SUPER-ADMIN',
@@ -27,7 +34,8 @@ class DefaultAccessControlSeederTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('roles', [
-            'code' => 'DESH-SOLAR-WAREHOUSE-MANAGER',
+            'code' =>
+                'DESH-SOLAR-WAREHOUSE-MANAGER',
             'is_active' => true,
         ]);
 
@@ -37,9 +45,37 @@ class DefaultAccessControlSeederTest extends TestCase
             'action' => 'view',
         ]);
 
-        $this->assertDatabaseMissing('permissions', [
-            'module' => 'warehouse-location',
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier.view',
+            'module' => 'supplier',
+            'action' => 'view',
         ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier.create',
+            'module' => 'supplier',
+            'action' => 'create',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier.update',
+            'module' => 'supplier',
+            'action' => 'update',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier.delete',
+            'module' => 'supplier',
+            'action' => 'delete',
+        ]);
+
+        $this->assertDatabaseMissing(
+            'permissions',
+            [
+                'module' =>
+                    'warehouse-location',
+            ]
+        );
     }
 
     public function test_super_admin_receives_every_permission(): void
@@ -53,7 +89,9 @@ class DefaultAccessControlSeederTest extends TestCase
 
         $this->assertSame(
             Permission::count(),
-            $superAdmin->permissions()->count()
+            $superAdmin
+                ->permissions()
+                ->count()
         );
     }
 
@@ -67,19 +105,51 @@ class DefaultAccessControlSeederTest extends TestCase
         )->firstOrFail();
 
         $this->assertTrue(
-            $role->hasPermission('warehouse.view')
+            $role->hasPermission(
+                'warehouse.view'
+            )
         );
 
         $this->assertTrue(
-            $role->hasPermission('warehouse.update')
+            $role->hasPermission(
+                'warehouse.update'
+            )
+        );
+
+        $this->assertTrue(
+            $role->hasPermission(
+                'supplier.view'
+            )
         );
 
         $this->assertFalse(
-            $role->hasPermission('user.create')
+            $role->hasPermission(
+                'supplier.create'
+            )
         );
 
         $this->assertFalse(
-            $role->hasPermission('warehouse.delete')
+            $role->hasPermission(
+                'supplier.update'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier.delete'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'user.create'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'warehouse.delete'
+            )
         );
 
         $this->assertFalse(
@@ -94,26 +164,61 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseCount('permissions', 19);
-        $this->assertDatabaseCount('roles', 6);
+        $this->assertDatabaseCount(
+            'permissions',
+            23
+        );
 
-        $warehouseViewPermission = Permission::where(
-            'code',
-            'warehouse.view'
-        )->firstOrFail();
+        $this->assertDatabaseCount(
+            'roles',
+            6
+        );
+
+        $warehouseViewPermission =
+            Permission::where(
+                'code',
+                'warehouse.view'
+            )->firstOrFail();
+
+        $supplierViewPermission =
+            Permission::where(
+                'code',
+                'supplier.view'
+            )->firstOrFail();
 
         $warehouseManager = Role::where(
             'code',
             'DESH-SOLAR-WAREHOUSE-MANAGER'
         )->firstOrFail();
 
-        $this->assertDatabaseHas('role_permission', [
-            'role_id' => $warehouseManager->id,
-            'permission_id' => $warehouseViewPermission->id,
-        ]);
+        $this->assertDatabaseHas(
+            'role_permission',
+            [
+                'role_id' =>
+                    $warehouseManager->id,
 
-        $this->assertDatabaseMissing('permissions', [
-            'module' => 'warehouse-location',
-        ]);
+                'permission_id' =>
+                    $warehouseViewPermission->id,
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'role_permission',
+            [
+                'role_id' =>
+                    $warehouseManager->id,
+
+                'permission_id' =>
+                    $supplierViewPermission->id,
+            ]
+        );
+
+        $this->assertDatabaseMissing(
+            'permissions',
+            [
+                'module' =>
+                    'warehouse-location',
+            ]
+        );
     }
 }

@@ -18,6 +18,7 @@ type NavigationIconName =
   | "company"
   | "branch"
   | "warehouse"
+  | "supplier"
   | "users";
 
 interface NavigationItem {
@@ -54,6 +55,12 @@ const navigationItems: NavigationItem[] = [
     href: "/dashboard/warehouses",
     permission: "warehouse.view",
     icon: "warehouse",
+  },
+  {
+    label: "Suppliers",
+    href: "/dashboard/suppliers",
+    permission: "supplier.view",
+    icon: "supplier",
   },
   {
     label: "User Assignments",
@@ -171,6 +178,33 @@ function NavigationIcon({
         <path d="M3 21V8l9-5 9 5v13" />
         <path d="M7 21v-8h10v8M7 10h10" />
         <path d="M10 17h4" />
+      </svg>
+    );
+  }
+
+  if (name === "supplier") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        className="h-5 w-5"
+        aria-hidden="true"
+      >
+        <path d="M3 7h11v10H3z" />
+        <path d="M14 10h3l4 4v3h-7z" />
+        <circle
+          cx="7"
+          cy="19"
+          r="2"
+        />
+        <circle
+          cx="18"
+          cy="19"
+          r="2"
+        />
+        <path d="M5 7V5h7v2" />
       </svg>
     );
   }

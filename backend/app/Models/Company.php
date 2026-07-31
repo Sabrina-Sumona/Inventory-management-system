@@ -42,6 +42,11 @@ class Company extends Model
         return $this->hasMany(Warehouse::class);
     }
 
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(Supplier::class);
+    }
+
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -60,6 +65,8 @@ class Company extends Model
             return $query;
         }
 
-        return $query->whereKey($user->company_id);
+        return $query->whereKey(
+            $user->company_id
+        );
     }
 }

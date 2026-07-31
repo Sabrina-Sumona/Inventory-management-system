@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * @var list<string>
@@ -60,6 +63,22 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function createdSuppliers(): HasMany
+    {
+        return $this->hasMany(
+            Supplier::class,
+            'created_by'
+        );
+    }
+
+    public function updatedSuppliers(): HasMany
+    {
+        return $this->hasMany(
+            Supplier::class,
+            'updated_by'
+        );
+    }
+
     public function hasRole(string $roleCode): bool
     {
         return $this->roles()
@@ -73,8 +92,9 @@ class User extends Authenticatable
         return $this->hasRole('SUPER-ADMIN');
     }
 
-    public function canAccessCompany(Company|int $company): bool
-    {
+    public function canAccessCompany(
+        Company|int $company
+    ): bool {
         if ($this->isSuperAdmin()) {
             return true;
         }
@@ -84,7 +104,8 @@ class User extends Authenticatable
             : $company;
 
         return $this->company_id !== null
-            && (int) $this->company_id === (int) $companyId;
+            && (int) $this->company_id ===
+                (int) $companyId;
     }
 
     public function assignRole(
@@ -108,7 +129,8 @@ class User extends Authenticatable
             }
         } elseif (
             $this->company_id === null
-            || (int) $role->company_id !== (int) $this->company_id
+            || (int) $role->company_id !==
+                (int) $this->company_id
         ) {
             throw new InvalidArgumentException(
                 'The role belongs to a different company.'
@@ -135,8 +157,9 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function canAccessBranch(Branch|int $branch): bool
-    {
+    public function canAccessBranch(
+        Branch|int $branch
+    ): bool {
         $branchModel = $branch instanceof Branch
             ? $branch
             : Branch::find($branch);
@@ -149,12 +172,19 @@ class User extends Authenticatable
             return true;
         }
 
-        if (! $this->canAccessCompany($branchModel->company_id)) {
+        if (
+            ! $this->canAccessCompany(
+                $branchModel->company_id
+            )
+        ) {
             return false;
         }
 
         return $this->branches()
-            ->where('branches.id', $branchModel->id)
+            ->where(
+                'branches.id',
+                $branchModel->id
+            )
             ->exists();
     }
 
@@ -169,7 +199,10 @@ class User extends Authenticatable
             );
         }
 
-        if ((int) $branch->company_id !== (int) $this->company_id) {
+        if (
+            (int) $branch->company_id !==
+            (int) $this->company_id
+        ) {
             throw new InvalidArgumentException(
                 'The branch belongs to a different company.'
             );
@@ -182,31 +215,42 @@ class User extends Authenticatable
         ): void {
             if ($isPrimary) {
                 DB::table('branch_user')
-                    ->where('user_id', $this->id)
+                    ->where(
+                        'user_id',
+                        $this->id
+                    )
                     ->update([
                         'is_primary' => false,
                         'updated_at' => now(),
                     ]);
             }
 
-            $this->branches()->syncWithoutDetaching([
-                $branch->id => [
-                    'assigned_by' => $assignedBy?->id,
-                    'is_primary' => $isPrimary,
-                ],
-            ]);
+            $this->branches()
+                ->syncWithoutDetaching([
+                    $branch->id => [
+                        'assigned_by' =>
+                            $assignedBy?->id,
+                        'is_primary' =>
+                            $isPrimary,
+                    ],
+                ]);
         });
     }
 
-    public function removeBranch(Branch $branch): void
-    {
-        $this->branches()->detach($branch->id);
+    public function removeBranch(
+        Branch $branch
+    ): void {
+        $this->branches()
+            ->detach($branch->id);
     }
 
     public function primaryBranch(): ?Branch
     {
         return $this->branches()
-            ->wherePivot('is_primary', true)
+            ->wherePivot(
+                'is_primary',
+                true
+            )
             ->first();
     }
 
@@ -223,11 +267,13 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function canAccessWarehouse(Warehouse|int $warehouse): bool
-    {
-        $warehouseModel = $warehouse instanceof Warehouse
-            ? $warehouse
-            : Warehouse::find($warehouse);
+    public function canAccessWarehouse(
+        Warehouse|int $warehouse
+    ): bool {
+        $warehouseModel =
+            $warehouse instanceof Warehouse
+                ? $warehouse
+                : Warehouse::find($warehouse);
 
         if ($warehouseModel === null) {
             return false;
@@ -237,16 +283,27 @@ class User extends Authenticatable
             return true;
         }
 
-        if (! $this->canAccessCompany($warehouseModel->company_id)) {
+        if (
+            ! $this->canAccessCompany(
+                $warehouseModel->company_id
+            )
+        ) {
             return false;
         }
 
-        if (! $this->canAccessBranch($warehouseModel->branch_id)) {
+        if (
+            ! $this->canAccessBranch(
+                $warehouseModel->branch_id
+            )
+        ) {
             return false;
         }
 
         return $this->warehouses()
-            ->where('warehouses.id', $warehouseModel->id)
+            ->where(
+                'warehouses.id',
+                $warehouseModel->id
+            )
             ->exists();
     }
 
@@ -261,13 +318,20 @@ class User extends Authenticatable
             );
         }
 
-        if ((int) $warehouse->company_id !== (int) $this->company_id) {
+        if (
+            (int) $warehouse->company_id !==
+            (int) $this->company_id
+        ) {
             throw new InvalidArgumentException(
                 'The warehouse belongs to a different company.'
             );
         }
 
-        if (! $this->canAccessBranch($warehouse->branch_id)) {
+        if (
+            ! $this->canAccessBranch(
+                $warehouse->branch_id
+            )
+        ) {
             throw new InvalidArgumentException(
                 'The user must be assigned to the warehouse branch first.'
             );
@@ -280,36 +344,48 @@ class User extends Authenticatable
         ): void {
             if ($isPrimary) {
                 DB::table('user_warehouse')
-                    ->where('user_id', $this->id)
+                    ->where(
+                        'user_id',
+                        $this->id
+                    )
                     ->update([
                         'is_primary' => false,
                         'updated_at' => now(),
                     ]);
             }
 
-            $this->warehouses()->syncWithoutDetaching([
-                $warehouse->id => [
-                    'assigned_by' => $assignedBy?->id,
-                    'is_primary' => $isPrimary,
-                ],
-            ]);
+            $this->warehouses()
+                ->syncWithoutDetaching([
+                    $warehouse->id => [
+                        'assigned_by' =>
+                            $assignedBy?->id,
+                        'is_primary' =>
+                            $isPrimary,
+                    ],
+                ]);
         });
     }
 
-    public function removeWarehouse(Warehouse $warehouse): void
-    {
-        $this->warehouses()->detach($warehouse->id);
+    public function removeWarehouse(
+        Warehouse $warehouse
+    ): void {
+        $this->warehouses()
+            ->detach($warehouse->id);
     }
 
     public function primaryWarehouse(): ?Warehouse
     {
         return $this->warehouses()
-            ->wherePivot('is_primary', true)
+            ->wherePivot(
+                'is_primary',
+                true
+            )
             ->first();
     }
 
-    public function hasPermission(string $permissionCode): bool
-    {
+    public function hasPermission(
+        string $permissionCode
+    ): bool {
         if ($this->isSuperAdmin()) {
             return true;
         }
@@ -319,10 +395,15 @@ class User extends Authenticatable
             ->whereHas(
                 'permissions',
                 fn (Builder $query) => $query
-                    ->where('permissions.code', $permissionCode)
-                    ->where('permissions.is_active', true)
+                    ->where(
+                        'permissions.code',
+                        $permissionCode
+                    )
+                    ->where(
+                        'permissions.is_active',
+                        true
+                    )
             )
             ->exists();
     }
-    
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserAssignmentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WarehouseController;
@@ -86,6 +87,25 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource(
         'warehouses',
         WarehouseController::class
+    )->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
+
+    Route::post(
+        '/suppliers/{supplier}/restore',
+        [
+            SupplierController::class,
+            'restore',
+        ]
+    )->whereNumber('supplier');
+
+    Route::apiResource(
+        'suppliers',
+        SupplierController::class
     )->only([
         'index',
         'store',
