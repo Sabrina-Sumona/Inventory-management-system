@@ -494,7 +494,7 @@ export default function WarehousesPage() {
               setSearch(event.target.value)
             }
             placeholder="Search warehouse name, code, city or district"
-            className="h-11 rounded-lg border border-slate-300 px-4 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:bg-slate-100 disabled:text-slate-500"
           />
 
           <select
@@ -507,7 +507,7 @@ export default function WarehousesPage() {
                   | "inactive"
               )
             }
-            className="h-11 rounded-lg border border-slate-300 bg-white px-3 outline-none focus:border-emerald-600"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600"
           >
             <option value="all">
               All statuses
@@ -530,7 +530,7 @@ export default function WarehousesPage() {
                   | "regular"
               )
             }
-            className="h-11 rounded-lg border border-slate-300 bg-white px-3 outline-none focus:border-emerald-600"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600"
           >
             <option value="all">
               All warehouse types

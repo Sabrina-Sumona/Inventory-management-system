@@ -488,7 +488,7 @@ export default function UserAssignmentsPage() {
               setSearch(event.target.value)
             }
             placeholder="Search user name or email"
-            className="h-11 flex-1 rounded-lg border border-slate-300 px-4 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+            className="h-11 flex-1 rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:bg-slate-100 disabled:text-slate-500"
           />
 
           <button
