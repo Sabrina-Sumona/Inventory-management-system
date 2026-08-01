@@ -8,6 +8,7 @@ import {
 import { AxiosError } from "axios";
 
 import { SupplierContactForm } from "@/components/suppliers/SupplierContactForm";
+import { SupplierFinancialSettingPanel } from "@/components/suppliers/SupplierFinancialSettingPanel";
 import { SupplierForm } from "@/components/suppliers/SupplierForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { branchService } from "@/services/branchService";
@@ -150,6 +151,11 @@ export default function SuppliersPage() {
   const [
     selectedSupplier,
     setSelectedSupplier,
+  ] = useState<Supplier | null>(null);
+
+  const [
+    selectedFinancialSupplier,
+    setSelectedFinancialSupplier,
   ] = useState<Supplier | null>(null);
 
   const [
@@ -315,6 +321,34 @@ export default function SuppliersPage() {
         "supplier-contact.delete"
     ) ?? false;
 
+  const canViewFinancialSettings =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-financial-setting.view"
+    ) ?? false;
+
+  const canCreateFinancialSettings =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-financial-setting.create"
+    ) ?? false;
+
+  const canUpdateFinancialSettings =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-financial-setting.update"
+    ) ?? false;
+
+  const canDeleteFinancialSettings =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-financial-setting.delete"
+    ) ?? false;
+
   async function loadSuppliers(
     page = 1
   ): Promise<void> {
@@ -359,6 +393,7 @@ export default function SuppliersPage() {
         );
 
       setSuppliers(data.suppliers);
+
       setSupplierPagination(
         data.pagination
       );
@@ -451,6 +486,7 @@ export default function SuppliersPage() {
         }
 
         setSuppliers(data.suppliers);
+
         setSupplierPagination(
           data.pagination
         );
@@ -568,14 +604,31 @@ export default function SuppliersPage() {
     setSupplierFormErrors({});
   }
 
+  function openFinancialSettingsPanel(
+    supplier: Supplier
+  ): void {
+    setSelectedFinancialSupplier(
+      supplier
+    );
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  }
+
+  function closeFinancialSettingsPanel(): void {
+    setSelectedFinancialSupplier(null);
+  }
+
   async function openContactsPanel(
     supplier: Supplier
   ): Promise<void> {
     setSelectedSupplier(supplier);
     setSupplierContacts([]);
+
     setContactPagination(
       emptyContactPagination
     );
+
     setContactSearch("");
     setContactTypeFilter("all");
     setContactStatusFilter("all");
@@ -600,9 +653,11 @@ export default function SuppliersPage() {
 
     setSelectedSupplier(null);
     setSupplierContacts([]);
+
     setContactPagination(
       emptyContactPagination
     );
+
     setEditingContact(null);
     setIsContactFormOpen(false);
     setContactFormErrors({});
@@ -986,7 +1041,8 @@ export default function SuppliersPage() {
           <p className="mt-2 text-sm text-slate-500">
             Manage supplier details,
             contacts, branch access,
-            payment terms, balances, and
+            payment terms, financial
+            settings, balances, and
             operational status.
           </p>
         </div>
@@ -1300,6 +1356,20 @@ export default function SuppliersPage() {
                           </button>
                         )}
 
+                        {canViewFinancialSettings && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openFinancialSettingsPanel(
+                                supplier
+                              )
+                            }
+                            className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50"
+                          >
+                            Financial
+                          </button>
+                        )}
+
                         {canUpdateSupplier && (
                           <>
                             <button
@@ -1369,6 +1439,7 @@ export default function SuppliersPage() {
                         )}
 
                         {!canViewContacts &&
+                          !canViewFinancialSettings &&
                           !canUpdateSupplier &&
                           !canDeleteSupplier && (
                             <span className="text-xs text-slate-400">
@@ -1889,6 +1960,27 @@ export default function SuppliersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedFinancialSupplier && (
+        <SupplierFinancialSettingPanel
+          key={selectedFinancialSupplier.id}
+          supplier={
+            selectedFinancialSupplier
+          }
+          canCreate={
+            canCreateFinancialSettings
+          }
+          canUpdate={
+            canUpdateFinancialSettings
+          }
+          canDelete={
+            canDeleteFinancialSettings
+          }
+          onClose={
+            closeFinancialSettingsPanel
+          }
+        />
       )}
 
       {isContactFormOpen &&

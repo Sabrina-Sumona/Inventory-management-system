@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -102,13 +103,20 @@ class Supplier extends Model
         );
     }
 
-    public function primaryContact(): HasMany
+    public function primaryContact(): HasOne
     {
-        return $this->hasMany(
+        return $this->hasOne(
             SupplierContact::class
         )->where(
             'supplier_contacts.is_primary',
             true
+        );
+    }
+
+    public function financialSetting(): HasOne
+    {
+        return $this->hasOne(
+            SupplierFinancialSetting::class
         );
     }
 

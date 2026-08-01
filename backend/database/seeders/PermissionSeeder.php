@@ -146,6 +146,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete supplier contact records.',
             ],
 
+            // Supplier Financial Settings
+            [
+                'name' => 'View Supplier Financial Settings',
+                'code' => 'supplier-financial-setting.view',
+                'module' => 'supplier-financial-setting',
+                'action' => 'view',
+                'description' => 'View supplier financial settings.',
+            ],
+            [
+                'name' => 'Create Supplier Financial Settings',
+                'code' => 'supplier-financial-setting.create',
+                'module' => 'supplier-financial-setting',
+                'action' => 'create',
+                'description' => 'Create supplier financial settings.',
+            ],
+            [
+                'name' => 'Update Supplier Financial Settings',
+                'code' => 'supplier-financial-setting.update',
+                'module' => 'supplier-financial-setting',
+                'action' => 'update',
+                'description' => 'Update supplier financial settings.',
+            ],
+            [
+                'name' => 'Delete Supplier Financial Settings',
+                'code' => 'supplier-financial-setting.delete',
+                'module' => 'supplier-financial-setting',
+                'action' => 'delete',
+                'description' => 'Delete supplier financial settings.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',

@@ -8,6 +8,12 @@ import type {
   SupplierContactQuery,
   SupplierContactResponse,
   SupplierContactUpdatePayload,
+  SupplierFinancialSetting,
+  SupplierFinancialSettingListResponse,
+  SupplierFinancialSettingPayload,
+  SupplierFinancialSettingQuery,
+  SupplierFinancialSettingResponse,
+  SupplierFinancialSettingUpdatePayload,
   SupplierListResponse,
   SupplierPayload,
   SupplierQuery,
@@ -195,5 +201,74 @@ export const supplierService = {
 
     return response.data.data
       .supplier_contact;
+  },
+
+  async getSupplierFinancialSettings(
+    query: SupplierFinancialSettingQuery = {}
+  ): Promise<
+    SupplierFinancialSettingListResponse["data"]
+  > {
+    const response =
+      await api.get<SupplierFinancialSettingListResponse>(
+        "/api/supplier-financial-settings",
+        {
+          params: cleanQuery(query),
+        }
+      );
+
+    return response.data.data;
+  },
+
+  async getSupplierFinancialSetting(
+    supplierFinancialSettingId: number
+  ): Promise<SupplierFinancialSetting> {
+    const response =
+      await api.get<SupplierFinancialSettingResponse>(
+        `/api/supplier-financial-settings/${supplierFinancialSettingId}`
+      );
+
+    return response.data.data
+      .supplier_financial_setting;
+  },
+
+  async createSupplierFinancialSetting(
+    payload: SupplierFinancialSettingPayload
+  ): Promise<SupplierFinancialSetting> {
+    await ensureCsrfCookie();
+
+    const response =
+      await api.post<SupplierFinancialSettingResponse>(
+        "/api/supplier-financial-settings",
+        payload
+      );
+
+    return response.data.data
+      .supplier_financial_setting;
+  },
+
+  async updateSupplierFinancialSetting(
+    supplierFinancialSettingId: number,
+    payload: SupplierFinancialSettingUpdatePayload
+  ): Promise<SupplierFinancialSetting> {
+    await ensureCsrfCookie();
+
+    const response =
+      await api.patch<SupplierFinancialSettingResponse>(
+        `/api/supplier-financial-settings/${supplierFinancialSettingId}`,
+        payload
+      );
+
+    return response.data.data
+      .supplier_financial_setting;
+  },
+
+  async deleteSupplierFinancialSetting(
+    supplierFinancialSettingId: number
+  ): Promise<void> {
+    await ensureCsrfCookie();
+
+    await api.delete(
+      `/api/supplier-financial-settings/${supplierFinancialSettingId}`
+    );
   },
 };

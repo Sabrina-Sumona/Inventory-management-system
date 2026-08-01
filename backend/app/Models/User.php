@@ -97,6 +97,22 @@ class User extends Authenticatable
         );
     }
 
+    public function createdSupplierFinancialSettings(): HasMany
+    {
+        return $this->hasMany(
+            SupplierFinancialSetting::class,
+            'created_by'
+        );
+    }
+
+    public function updatedSupplierFinancialSettings(): HasMany
+    {
+        return $this->hasMany(
+            SupplierFinancialSetting::class,
+            'updated_by'
+        );
+    }
+
     public function hasRole(
         string $roleCode
     ): bool {
@@ -264,7 +280,6 @@ class User extends Authenticatable
                         $branch->id => [
                             'assigned_by' =>
                                 $assignedBy?->id,
-
                             'is_primary' =>
                                 $isPrimary,
                         ],
@@ -400,7 +415,6 @@ class User extends Authenticatable
                         $warehouse->id => [
                             'assigned_by' =>
                                 $assignedBy?->id,
-
                             'is_primary' =>
                                 $isPrimary,
                         ],

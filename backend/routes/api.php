@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\SupplierContactController;
 use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\SupplierFinancialSettingController;
 use App\Http\Controllers\Api\UserAssignmentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WarehouseController;
@@ -128,6 +129,20 @@ Route::middleware('auth:sanctum')->group(function (): void {
         SupplierContactController::class
     )->parameters([
         'supplier-contacts' => 'supplierContact',
+    ])->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
+
+    Route::apiResource(
+        'supplier-financial-settings',
+        SupplierFinancialSettingController::class
+    )->parameters([
+        'supplier-financial-settings' =>
+            'supplierFinancialSetting',
     ])->only([
         'index',
         'store',

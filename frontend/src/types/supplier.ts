@@ -148,7 +148,7 @@ export type SupplierContactType =
   | "support"
   | "management";
 
-export interface SupplierContactSupplierSummary {
+export interface SupplierSummary {
   id: number;
   company_id: number;
   branch_id: number | null;
@@ -176,7 +176,7 @@ export interface SupplierContact {
 
   notes: string | null;
 
-  supplier: SupplierContactSupplierSummary | null;
+  supplier: SupplierSummary | null;
   creator: SupplierUserSummary | null;
   updater: SupplierUserSummary | null;
 
@@ -255,6 +255,157 @@ export interface SupplierContactQuery {
   sort_by?:
     | "name"
     | "contact_type"
+    | "created_at"
+    | "updated_at";
+
+  sort_direction?: "asc" | "desc";
+  per_page?: number;
+  page?: number;
+}
+
+export type SupplierPaymentMethod =
+  | "cash"
+  | "bank_transfer"
+  | "cheque"
+  | "mobile_banking"
+  | "credit";
+
+export type SupplierPurchasePriceBasis =
+  | "inclusive_of_tax"
+  | "exclusive_of_tax";
+
+export type SupplierPurchaseOrderTerm =
+  | "standard"
+  | "advance_payment"
+  | "partial_advance"
+  | "cash_on_delivery"
+  | "credit";
+
+export interface SupplierFinancialSetting {
+  id: number;
+  supplier_id: number;
+
+  currency_code: string;
+  default_payment_method: SupplierPaymentMethod;
+
+  payment_term_days: number;
+  credit_limit: string;
+
+  allow_credit_purchase: boolean;
+  block_purchase_on_credit_limit: boolean;
+
+  default_purchase_discount_percent: string;
+
+  is_tax_applicable: boolean;
+  default_tax_percent: string;
+
+  is_withholding_tax_applicable: boolean;
+  withholding_tax_percent: string;
+
+  purchase_price_basis: SupplierPurchasePriceBasis;
+  default_purchase_order_term: SupplierPurchaseOrderTerm;
+
+  payment_instruction: string | null;
+  notes: string | null;
+
+  is_active: boolean;
+
+  supplier: SupplierSummary | null;
+  creator: SupplierUserSummary | null;
+  updater: SupplierUserSummary | null;
+
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface SupplierFinancialSettingPagination {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}
+
+export interface SupplierFinancialSettingListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    supplier_financial_settings:
+      SupplierFinancialSetting[];
+
+    pagination:
+      SupplierFinancialSettingPagination;
+  };
+}
+
+export interface SupplierFinancialSettingResponse {
+  success: boolean;
+  message: string;
+  data: {
+    supplier_financial_setting:
+      SupplierFinancialSetting;
+  };
+}
+
+export interface SupplierFinancialSettingPayload {
+  supplier_id: number;
+
+  currency_code: string;
+  default_payment_method: SupplierPaymentMethod;
+
+  payment_term_days: number;
+  credit_limit: number;
+
+  allow_credit_purchase: boolean;
+  block_purchase_on_credit_limit: boolean;
+
+  default_purchase_discount_percent: number;
+
+  is_tax_applicable: boolean;
+  default_tax_percent: number;
+
+  is_withholding_tax_applicable: boolean;
+  withholding_tax_percent: number;
+
+  purchase_price_basis: SupplierPurchasePriceBasis;
+  default_purchase_order_term: SupplierPurchaseOrderTerm;
+
+  payment_instruction: string | null;
+  notes: string | null;
+
+  is_active: boolean;
+}
+
+export type SupplierFinancialSettingUpdatePayload =
+  Partial<
+    Omit<
+      SupplierFinancialSettingPayload,
+      "supplier_id"
+    >
+  >;
+
+export interface SupplierFinancialSettingQuery {
+  supplier_id?: number;
+  search?: string;
+
+  currency_code?: string;
+
+  default_payment_method?:
+    SupplierPaymentMethod;
+
+  allow_credit_purchase?: boolean;
+  is_tax_applicable?: boolean;
+
+  is_withholding_tax_applicable?:
+    boolean;
+
+  is_active?: boolean;
+
+  sort_by?:
+    | "currency_code"
+    | "credit_limit"
+    | "payment_term_days"
     | "created_at"
     | "updated_at";
 

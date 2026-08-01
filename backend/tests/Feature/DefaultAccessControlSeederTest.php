@@ -18,7 +18,7 @@ class DefaultAccessControlSeederTest extends TestCase
 
         $this->assertDatabaseCount(
             'permissions',
-            23
+            31
         );
 
         $this->assertDatabaseCount(
@@ -66,6 +66,62 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->assertDatabaseHas('permissions', [
             'code' => 'supplier.delete',
             'module' => 'supplier',
+            'action' => 'delete',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier-contact.view',
+            'module' => 'supplier-contact',
+            'action' => 'view',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier-contact.create',
+            'module' => 'supplier-contact',
+            'action' => 'create',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier-contact.update',
+            'module' => 'supplier-contact',
+            'action' => 'update',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' => 'supplier-contact.delete',
+            'module' => 'supplier-contact',
+            'action' => 'delete',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' =>
+                'supplier-financial-setting.view',
+            'module' =>
+                'supplier-financial-setting',
+            'action' => 'view',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' =>
+                'supplier-financial-setting.create',
+            'module' =>
+                'supplier-financial-setting',
+            'action' => 'create',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' =>
+                'supplier-financial-setting.update',
+            'module' =>
+                'supplier-financial-setting',
+            'action' => 'update',
+        ]);
+
+        $this->assertDatabaseHas('permissions', [
+            'code' =>
+                'supplier-financial-setting.delete',
+            'module' =>
+                'supplier-financial-setting',
             'action' => 'delete',
         ]);
 
@@ -122,6 +178,18 @@ class DefaultAccessControlSeederTest extends TestCase
             )
         );
 
+        $this->assertTrue(
+            $role->hasPermission(
+                'supplier-contact.view'
+            )
+        );
+
+        $this->assertTrue(
+            $role->hasPermission(
+                'supplier-financial-setting.view'
+            )
+        );
+
         $this->assertFalse(
             $role->hasPermission(
                 'supplier.create'
@@ -137,6 +205,42 @@ class DefaultAccessControlSeederTest extends TestCase
         $this->assertFalse(
             $role->hasPermission(
                 'supplier.delete'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-contact.create'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-contact.update'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-contact.delete'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-financial-setting.create'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-financial-setting.update'
+            )
+        );
+
+        $this->assertFalse(
+            $role->hasPermission(
+                'supplier-financial-setting.delete'
             )
         );
 
@@ -166,7 +270,7 @@ class DefaultAccessControlSeederTest extends TestCase
 
         $this->assertDatabaseCount(
             'permissions',
-            23
+            31
         );
 
         $this->assertDatabaseCount(
@@ -184,6 +288,18 @@ class DefaultAccessControlSeederTest extends TestCase
             Permission::where(
                 'code',
                 'supplier.view'
+            )->firstOrFail();
+
+        $supplierContactViewPermission =
+            Permission::where(
+                'code',
+                'supplier-contact.view'
+            )->firstOrFail();
+
+        $supplierFinancialSettingViewPermission =
+            Permission::where(
+                'code',
+                'supplier-financial-setting.view'
             )->firstOrFail();
 
         $warehouseManager = Role::where(
@@ -210,6 +326,28 @@ class DefaultAccessControlSeederTest extends TestCase
 
                 'permission_id' =>
                     $supplierViewPermission->id,
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'role_permission',
+            [
+                'role_id' =>
+                    $warehouseManager->id,
+
+                'permission_id' =>
+                    $supplierContactViewPermission->id,
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'role_permission',
+            [
+                'role_id' =>
+                    $warehouseManager->id,
+
+                'permission_id' =>
+                    $supplierFinancialSettingViewPermission->id,
             ]
         );
 
