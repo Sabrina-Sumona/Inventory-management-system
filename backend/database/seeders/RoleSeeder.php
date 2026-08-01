@@ -52,6 +52,11 @@ class RoleSeeder extends Seeder
                     'supplier.update',
                     'supplier.delete',
 
+                    'supplier-contact.view',
+                    'supplier-contact.create',
+                    'supplier-contact.update',
+                    'supplier-contact.delete',
+
                     'user.view',
                     'user.create',
                     'user.update',
@@ -70,7 +75,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Inventory Manager',
                 'code' => 'DESH-SOLAR-INVENTORY-MANAGER',
                 'description' =>
-                    'Manages inventory operations, warehouse records, and supplier information.',
+                    'Manages inventory operations, warehouse records, supplier information, and supplier contacts.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -84,6 +89,10 @@ class RoleSeeder extends Seeder
                     'supplier.create',
                     'supplier.update',
 
+                    'supplier-contact.view',
+                    'supplier-contact.create',
+                    'supplier-contact.update',
+
                     'user.view',
                     'role.view',
                 ],
@@ -93,7 +102,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Warehouse Manager',
                 'code' => 'DESH-SOLAR-WAREHOUSE-MANAGER',
                 'description' =>
-                    'Manages assigned warehouse operations and views supplier information.',
+                    'Manages assigned warehouse operations and views supplier and supplier contact information.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -103,6 +112,7 @@ class RoleSeeder extends Seeder
                     'warehouse.update',
 
                     'supplier.view',
+                    'supplier-contact.view',
                 ],
             ],
             [
@@ -118,6 +128,7 @@ class RoleSeeder extends Seeder
                     'warehouse.view',
 
                     'supplier.view',
+                    'supplier-contact.view',
                 ],
             ],
             [
@@ -125,7 +136,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Viewer',
                 'code' => 'DESH-SOLAR-VIEWER',
                 'description' =>
-                    'Read-only access to permitted organization and supplier records.',
+                    'Read-only access to permitted organization, supplier, and supplier contact records.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -133,6 +144,7 @@ class RoleSeeder extends Seeder
                     'warehouse.view',
 
                     'supplier.view',
+                    'supplier-contact.view',
                 ],
             ],
         ];

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\SupplierContactController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserAssignmentController;
 use App\Http\Controllers\Api\UserController;
@@ -107,6 +108,27 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'suppliers',
         SupplierController::class
     )->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
+
+    Route::post(
+        '/supplier-contacts/{supplierContact}/restore',
+        [
+            SupplierContactController::class,
+            'restore',
+        ]
+    )->whereNumber('supplierContact');
+
+    Route::apiResource(
+        'supplier-contacts',
+        SupplierContactController::class
+    )->parameters([
+        'supplier-contacts' => 'supplierContact',
+    ])->only([
         'index',
         'store',
         'show',

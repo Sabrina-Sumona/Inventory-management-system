@@ -50,7 +50,9 @@ class User extends Authenticatable
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(
+            Company::class
+        );
     }
 
     public function roles(): BelongsToMany
@@ -79,17 +81,42 @@ class User extends Authenticatable
         );
     }
 
-    public function hasRole(string $roleCode): bool
+    public function createdSupplierContacts(): HasMany
     {
+        return $this->hasMany(
+            SupplierContact::class,
+            'created_by'
+        );
+    }
+
+    public function updatedSupplierContacts(): HasMany
+    {
+        return $this->hasMany(
+            SupplierContact::class,
+            'updated_by'
+        );
+    }
+
+    public function hasRole(
+        string $roleCode
+    ): bool {
         return $this->roles()
-            ->where('roles.code', $roleCode)
-            ->where('roles.is_active', true)
+            ->where(
+                'roles.code',
+                $roleCode
+            )
+            ->where(
+                'roles.is_active',
+                true
+            )
             ->exists();
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole('SUPER-ADMIN');
+        return $this->hasRole(
+            'SUPER-ADMIN'
+        );
     }
 
     public function canAccessCompany(
@@ -99,9 +126,10 @@ class User extends Authenticatable
             return true;
         }
 
-        $companyId = $company instanceof Company
-            ? $company->getKey()
-            : $company;
+        $companyId =
+            $company instanceof Company
+                ? $company->getKey()
+                : $company;
 
         return $this->company_id !== null
             && (int) $this->company_id ===
@@ -137,11 +165,13 @@ class User extends Authenticatable
             );
         }
 
-        $this->roles()->syncWithoutDetaching([
-            $role->id => [
-                'assigned_by' => $assignedBy?->id,
-            ],
-        ]);
+        $this->roles()
+            ->syncWithoutDetaching([
+                $role->id => [
+                    'assigned_by' =>
+                        $assignedBy?->id,
+                ],
+            ]);
     }
 
     public function branches(): BelongsToMany
@@ -160,9 +190,10 @@ class User extends Authenticatable
     public function canAccessBranch(
         Branch|int $branch
     ): bool {
-        $branchModel = $branch instanceof Branch
-            ? $branch
-            : Branch::find($branch);
+        $branchModel =
+            $branch instanceof Branch
+                ? $branch
+                : Branch::find($branch);
 
         if ($branchModel === null) {
             return false;
@@ -208,33 +239,38 @@ class User extends Authenticatable
             );
         }
 
-        DB::transaction(function () use (
-            $branch,
-            $isPrimary,
-            $assignedBy
-        ): void {
-            if ($isPrimary) {
-                DB::table('branch_user')
-                    ->where(
-                        'user_id',
-                        $this->id
+        DB::transaction(
+            function () use (
+                $branch,
+                $isPrimary,
+                $assignedBy
+            ): void {
+                if ($isPrimary) {
+                    DB::table(
+                        'branch_user'
                     )
-                    ->update([
-                        'is_primary' => false,
-                        'updated_at' => now(),
+                        ->where(
+                            'user_id',
+                            $this->id
+                        )
+                        ->update([
+                            'is_primary' => false,
+                            'updated_at' => now(),
+                        ]);
+                }
+
+                $this->branches()
+                    ->syncWithoutDetaching([
+                        $branch->id => [
+                            'assigned_by' =>
+                                $assignedBy?->id,
+
+                            'is_primary' =>
+                                $isPrimary,
+                        ],
                     ]);
             }
-
-            $this->branches()
-                ->syncWithoutDetaching([
-                    $branch->id => [
-                        'assigned_by' =>
-                            $assignedBy?->id,
-                        'is_primary' =>
-                            $isPrimary,
-                    ],
-                ]);
-        });
+        );
     }
 
     public function removeBranch(
@@ -273,7 +309,9 @@ class User extends Authenticatable
         $warehouseModel =
             $warehouse instanceof Warehouse
                 ? $warehouse
-                : Warehouse::find($warehouse);
+                : Warehouse::find(
+                    $warehouse
+                );
 
         if ($warehouseModel === null) {
             return false;
@@ -337,33 +375,38 @@ class User extends Authenticatable
             );
         }
 
-        DB::transaction(function () use (
-            $warehouse,
-            $isPrimary,
-            $assignedBy
-        ): void {
-            if ($isPrimary) {
-                DB::table('user_warehouse')
-                    ->where(
-                        'user_id',
-                        $this->id
+        DB::transaction(
+            function () use (
+                $warehouse,
+                $isPrimary,
+                $assignedBy
+            ): void {
+                if ($isPrimary) {
+                    DB::table(
+                        'user_warehouse'
                     )
-                    ->update([
-                        'is_primary' => false,
-                        'updated_at' => now(),
+                        ->where(
+                            'user_id',
+                            $this->id
+                        )
+                        ->update([
+                            'is_primary' => false,
+                            'updated_at' => now(),
+                        ]);
+                }
+
+                $this->warehouses()
+                    ->syncWithoutDetaching([
+                        $warehouse->id => [
+                            'assigned_by' =>
+                                $assignedBy?->id,
+
+                            'is_primary' =>
+                                $isPrimary,
+                        ],
                     ]);
             }
-
-            $this->warehouses()
-                ->syncWithoutDetaching([
-                    $warehouse->id => [
-                        'assigned_by' =>
-                            $assignedBy?->id,
-                        'is_primary' =>
-                            $isPrimary,
-                    ],
-                ]);
-        });
+        );
     }
 
     public function removeWarehouse(
@@ -391,18 +434,22 @@ class User extends Authenticatable
         }
 
         return $this->roles()
-            ->where('roles.is_active', true)
+            ->where(
+                'roles.is_active',
+                true
+            )
             ->whereHas(
                 'permissions',
-                fn (Builder $query) => $query
-                    ->where(
-                        'permissions.code',
-                        $permissionCode
-                    )
-                    ->where(
-                        'permissions.is_active',
-                        true
-                    )
+                fn (Builder $query) =>
+                    $query
+                        ->where(
+                            'permissions.code',
+                            $permissionCode
+                        )
+                        ->where(
+                            'permissions.is_active',
+                            true
+                        )
             )
             ->exists();
     }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -56,12 +57,16 @@ class Supplier extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(
+            Company::class
+        );
     }
 
     public function branch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(
+            Branch::class
+        );
     }
 
     public function creator(): BelongsTo
@@ -77,6 +82,33 @@ class Supplier extends Model
         return $this->belongsTo(
             User::class,
             'updated_by'
+        );
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(
+            SupplierContact::class
+        );
+    }
+
+    public function activeContacts(): HasMany
+    {
+        return $this->hasMany(
+            SupplierContact::class
+        )->where(
+            'supplier_contacts.is_active',
+            true
+        );
+    }
+
+    public function primaryContact(): HasMany
+    {
+        return $this->hasMany(
+            SupplierContact::class
+        )->where(
+            'supplier_contacts.is_primary',
+            true
         );
     }
 
@@ -117,6 +149,12 @@ class Supplier extends Model
             return $query;
         }
 
+        if ($user->company_id === null) {
+            return $query->whereRaw(
+                '1 = 0'
+            );
+        }
+
         $query->where(
             'suppliers.company_id',
             $user->company_id
@@ -127,7 +165,9 @@ class Supplier extends Model
             ->pluck('branches.id');
 
         return $query->where(
-            function (Builder $branchQuery) use (
+            function (
+                Builder $branchQuery
+            ) use (
                 $accessibleBranchIds
             ): void {
                 $branchQuery

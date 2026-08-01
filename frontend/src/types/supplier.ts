@@ -140,3 +140,125 @@ export interface SupplierQuery {
   per_page?: number;
   page?: number;
 }
+
+export type SupplierContactType =
+  | "general"
+  | "sales"
+  | "accounts"
+  | "support"
+  | "management";
+
+export interface SupplierContactSupplierSummary {
+  id: number;
+  company_id: number;
+  branch_id: number | null;
+  name: string;
+  code: string;
+  business_name: string | null;
+  is_active: boolean;
+}
+
+export interface SupplierContact {
+  id: number;
+  supplier_id: number;
+
+  name: string;
+  designation: string | null;
+  department: string | null;
+  contact_type: SupplierContactType;
+
+  email: string | null;
+  phone: string | null;
+  alternate_phone: string | null;
+
+  is_primary: boolean;
+  is_active: boolean;
+
+  notes: string | null;
+
+  supplier: SupplierContactSupplierSummary | null;
+  creator: SupplierUserSummary | null;
+  updater: SupplierUserSummary | null;
+
+  created_at: string | null;
+  updated_at: string | null;
+  deleted_at: string | null;
+}
+
+export interface SupplierContactPagination {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}
+
+export interface SupplierContactListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    supplier_contacts: SupplierContact[];
+    pagination: SupplierContactPagination;
+  };
+}
+
+export interface SupplierContactResponse {
+  success: boolean;
+  message: string;
+  data: {
+    supplier_contact: SupplierContact;
+  };
+}
+
+export interface SupplierContactPayload {
+  supplier_id: number;
+
+  name: string;
+  designation: string | null;
+  department: string | null;
+  contact_type: SupplierContactType;
+
+  email: string | null;
+  phone: string | null;
+  alternate_phone: string | null;
+
+  is_primary: boolean;
+  is_active: boolean;
+
+  notes: string | null;
+}
+
+export interface SupplierContactUpdatePayload {
+  name?: string;
+  designation?: string | null;
+  department?: string | null;
+  contact_type?: SupplierContactType;
+
+  email?: string | null;
+  phone?: string | null;
+  alternate_phone?: string | null;
+
+  is_primary?: boolean;
+  is_active?: boolean;
+
+  notes?: string | null;
+}
+
+export interface SupplierContactQuery {
+  supplier_id?: number;
+  search?: string;
+  contact_type?: SupplierContactType;
+  is_primary?: boolean;
+  is_active?: boolean;
+
+  sort_by?:
+    | "name"
+    | "contact_type"
+    | "created_at"
+    | "updated_at";
+
+  sort_direction?: "asc" | "desc";
+  per_page?: number;
+  page?: number;
+}

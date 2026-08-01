@@ -7,6 +7,7 @@ import {
 } from "react";
 import { AxiosError } from "axios";
 
+import { SupplierContactForm } from "@/components/suppliers/SupplierContactForm";
 import { SupplierForm } from "@/components/suppliers/SupplierForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { branchService } from "@/services/branchService";
@@ -15,13 +16,27 @@ import type { ApiErrorResponse } from "@/types/auth";
 import type { Branch } from "@/types/branch";
 import type {
   Supplier,
+  SupplierContact,
+  SupplierContactPagination,
+  SupplierContactPayload,
+  SupplierContactQuery,
+  SupplierContactType,
   SupplierOpeningBalanceType,
   SupplierPagination,
   SupplierPayload,
   SupplierQuery,
 } from "@/types/supplier";
 
-const emptyPagination: SupplierPagination = {
+const emptySupplierPagination: SupplierPagination = {
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+  from: null,
+  to: null,
+};
+
+const emptyContactPagination: SupplierContactPagination = {
   current_page: 1,
   last_page: 1,
   per_page: 10,
@@ -80,6 +95,15 @@ function formatMoney(
   }).format(numericValue);
 }
 
+function formatContactType(
+  type: SupplierContactType
+): string {
+  return (
+    type.charAt(0).toUpperCase() +
+    type.slice(1)
+  );
+}
+
 export default function SuppliersPage() {
   const { user } = useAuth();
 
@@ -89,10 +113,12 @@ export default function SuppliersPage() {
   const [branches, setBranches] =
     useState<Branch[]>([]);
 
-  const [pagination, setPagination] =
-    useState<SupplierPagination>(
-      emptyPagination
-    );
+  const [
+    supplierPagination,
+    setSupplierPagination,
+  ] = useState<SupplierPagination>(
+    emptySupplierPagination
+  );
 
   const [search, setSearch] = useState("");
 
@@ -116,14 +142,85 @@ export default function SuppliersPage() {
     setEditingSupplier,
   ] = useState<Supplier | null>(null);
 
-  const [isFormOpen, setIsFormOpen] =
-    useState(false);
+  const [
+    isSupplierFormOpen,
+    setIsSupplierFormOpen,
+  ] = useState(false);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [
+    selectedSupplier,
+    setSelectedSupplier,
+  ] = useState<Supplier | null>(null);
 
-  const [isSaving, setIsSaving] =
-    useState(false);
+  const [
+    supplierContacts,
+    setSupplierContacts,
+  ] = useState<SupplierContact[]>([]);
+
+  const [
+    contactPagination,
+    setContactPagination,
+  ] = useState<SupplierContactPagination>(
+    emptyContactPagination
+  );
+
+  const [
+    contactSearch,
+    setContactSearch,
+  ] = useState("");
+
+  const [
+    contactTypeFilter,
+    setContactTypeFilter,
+  ] = useState<
+    "all" | SupplierContactType
+  >("all");
+
+  const [
+    contactStatusFilter,
+    setContactStatusFilter,
+  ] = useState<
+    "all" | "active" | "inactive"
+  >("all");
+
+  const [
+    primaryContactFilter,
+    setPrimaryContactFilter,
+  ] = useState<
+    "all" | "primary" | "non-primary"
+  >("all");
+
+  const [
+    editingContact,
+    setEditingContact,
+  ] = useState<SupplierContact | null>(
+    null
+  );
+
+  const [
+    isContactFormOpen,
+    setIsContactFormOpen,
+  ] = useState(false);
+
+  const [
+    isSupplierLoading,
+    setIsSupplierLoading,
+  ] = useState(true);
+
+  const [
+    isContactLoading,
+    setIsContactLoading,
+  ] = useState(false);
+
+  const [
+    isSupplierSaving,
+    setIsSupplierSaving,
+  ] = useState(false);
+
+  const [
+    isContactSaving,
+    setIsContactSaving,
+  ] = useState(false);
 
   const [
     updatingSupplierId,
@@ -135,8 +232,29 @@ export default function SuppliersPage() {
     setDeletingSupplierId,
   ] = useState<number | null>(null);
 
-  const [formErrors, setFormErrors] =
-    useState<Record<string, string>>({});
+  const [
+    updatingContactId,
+    setUpdatingContactId,
+  ] = useState<number | null>(null);
+
+  const [
+    deletingContactId,
+    setDeletingContactId,
+  ] = useState<number | null>(null);
+
+  const [
+    supplierFormErrors,
+    setSupplierFormErrors,
+  ] = useState<Record<string, string>>(
+    {}
+  );
+
+  const [
+    contactFormErrors,
+    setContactFormErrors,
+  ] = useState<Record<string, string>>(
+    {}
+  );
 
   const [
     errorMessage,
@@ -148,31 +266,59 @@ export default function SuppliersPage() {
     setSuccessMessage,
   ] = useState<string | null>(null);
 
-  const canCreate =
+  const canCreateSupplier =
     user?.permissions.some(
       (permission) =>
         permission.code ===
         "supplier.create"
     ) ?? false;
 
-  const canUpdate =
+  const canUpdateSupplier =
     user?.permissions.some(
       (permission) =>
         permission.code ===
         "supplier.update"
     ) ?? false;
 
-  const canDelete =
+  const canDeleteSupplier =
     user?.permissions.some(
       (permission) =>
         permission.code ===
         "supplier.delete"
     ) ?? false;
 
+  const canViewContacts =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-contact.view"
+    ) ?? false;
+
+  const canCreateContact =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-contact.create"
+    ) ?? false;
+
+  const canUpdateContact =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-contact.update"
+    ) ?? false;
+
+  const canDeleteContact =
+    user?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "supplier-contact.delete"
+    ) ?? false;
+
   async function loadSuppliers(
     page = 1
   ): Promise<void> {
-    setIsLoading(true);
+    setIsSupplierLoading(true);
     setErrorMessage(null);
 
     const selectedBranchId =
@@ -213,7 +359,9 @@ export default function SuppliersPage() {
         );
 
       setSuppliers(data.suppliers);
-      setPagination(data.pagination);
+      setSupplierPagination(
+        data.pagination
+      );
     } catch (error) {
       setErrorMessage(
         getApiMessage(
@@ -222,7 +370,68 @@ export default function SuppliersPage() {
         )
       );
     } finally {
-      setIsLoading(false);
+      setIsSupplierLoading(false);
+    }
+  }
+
+  async function loadSupplierContacts(
+    supplier: Supplier,
+    page = 1
+  ): Promise<void> {
+    setIsContactLoading(true);
+    setErrorMessage(null);
+
+    const query: SupplierContactQuery = {
+      supplier_id: supplier.id,
+
+      search:
+        contactSearch.trim() || undefined,
+
+      contact_type:
+        contactTypeFilter === "all"
+          ? undefined
+          : contactTypeFilter,
+
+      is_active:
+        contactStatusFilter === "all"
+          ? undefined
+          : contactStatusFilter ===
+              "active",
+
+      is_primary:
+        primaryContactFilter === "all"
+          ? undefined
+          : primaryContactFilter ===
+              "primary",
+
+      page,
+      per_page: 10,
+      sort_by: "name",
+      sort_direction: "asc",
+    };
+
+    try {
+      const data =
+        await supplierService.getSupplierContacts(
+          query
+        );
+
+      setSupplierContacts(
+        data.supplier_contacts
+      );
+
+      setContactPagination(
+        data.pagination
+      );
+    } catch (error) {
+      setErrorMessage(
+        getApiMessage(
+          error,
+          "Unable to load supplier contacts."
+        )
+      );
+    } finally {
+      setIsContactLoading(false);
     }
   }
 
@@ -242,7 +451,9 @@ export default function SuppliersPage() {
         }
 
         setSuppliers(data.suppliers);
-        setPagination(data.pagination);
+        setSupplierPagination(
+          data.pagination
+        );
       })
       .catch((error: unknown) => {
         if (!isMounted) {
@@ -258,7 +469,7 @@ export default function SuppliersPage() {
       })
       .finally(() => {
         if (isMounted) {
-          setIsLoading(false);
+          setIsSupplierLoading(false);
         }
       });
 
@@ -282,12 +493,11 @@ export default function SuppliersPage() {
           return;
         }
 
-        const activeBranches =
+        setBranches(
           data.branches.filter(
             (branch) => branch.is_active
-          );
-
-        setBranches(activeBranches);
+          )
+        );
       })
       .catch((error: unknown) => {
         if (!isMounted) {
@@ -307,7 +517,7 @@ export default function SuppliersPage() {
     };
   }, []);
 
-  async function handleSearch(
+  async function handleSupplierSearch(
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
@@ -315,39 +525,122 @@ export default function SuppliersPage() {
     await loadSuppliers(1);
   }
 
-  function openCreateForm(): void {
-    setEditingSupplier(null);
-    setFormErrors({});
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setIsFormOpen(true);
-  }
+  async function handleContactSearch(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
 
-  function openEditForm(
-    supplier: Supplier
-  ): void {
-    setEditingSupplier(supplier);
-    setFormErrors({});
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setIsFormOpen(true);
-  }
-
-  function closeForm(): void {
-    if (isSaving) {
+    if (!selectedSupplier) {
       return;
     }
 
-    setIsFormOpen(false);
-    setEditingSupplier(null);
-    setFormErrors({});
+    await loadSupplierContacts(
+      selectedSupplier,
+      1
+    );
   }
 
-  async function handleSave(
+  function openCreateSupplierForm(): void {
+    setEditingSupplier(null);
+    setSupplierFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsSupplierFormOpen(true);
+  }
+
+  function openEditSupplierForm(
+    supplier: Supplier
+  ): void {
+    setEditingSupplier(supplier);
+    setSupplierFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsSupplierFormOpen(true);
+  }
+
+  function closeSupplierForm(): void {
+    if (isSupplierSaving) {
+      return;
+    }
+
+    setIsSupplierFormOpen(false);
+    setEditingSupplier(null);
+    setSupplierFormErrors({});
+  }
+
+  async function openContactsPanel(
+    supplier: Supplier
+  ): Promise<void> {
+    setSelectedSupplier(supplier);
+    setSupplierContacts([]);
+    setContactPagination(
+      emptyContactPagination
+    );
+    setContactSearch("");
+    setContactTypeFilter("all");
+    setContactStatusFilter("all");
+    setPrimaryContactFilter("all");
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    await loadSupplierContacts(
+      supplier,
+      1
+    );
+  }
+
+  function closeContactsPanel(): void {
+    if (
+      isContactSaving ||
+      updatingContactId !== null ||
+      deletingContactId !== null
+    ) {
+      return;
+    }
+
+    setSelectedSupplier(null);
+    setSupplierContacts([]);
+    setContactPagination(
+      emptyContactPagination
+    );
+    setEditingContact(null);
+    setIsContactFormOpen(false);
+    setContactFormErrors({});
+  }
+
+  function openCreateContactForm(): void {
+    setEditingContact(null);
+    setContactFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsContactFormOpen(true);
+  }
+
+  function openEditContactForm(
+    contact: SupplierContact
+  ): void {
+    setEditingContact(contact);
+    setContactFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsContactFormOpen(true);
+  }
+
+  function closeContactForm(): void {
+    if (isContactSaving) {
+      return;
+    }
+
+    setIsContactFormOpen(false);
+    setEditingContact(null);
+    setContactFormErrors({});
+  }
+
+  async function handleSupplierSave(
     payload: SupplierPayload
   ): Promise<void> {
-    setIsSaving(true);
-    setFormErrors({});
+    setIsSupplierSaving(true);
+    setSupplierFormErrors({});
     setErrorMessage(null);
     setSuccessMessage(null);
 
@@ -371,14 +664,14 @@ export default function SuppliersPage() {
         );
       }
 
-      setIsFormOpen(false);
+      setIsSupplierFormOpen(false);
       setEditingSupplier(null);
 
       await loadSuppliers(
-        pagination.current_page
+        supplierPagination.current_page
       );
     } catch (error) {
-      setFormErrors(
+      setSupplierFormErrors(
         getValidationErrors(error)
       );
 
@@ -389,11 +682,83 @@ export default function SuppliersPage() {
         )
       );
     } finally {
-      setIsSaving(false);
+      setIsSupplierSaving(false);
     }
   }
 
-  async function handleStatusChange(
+  async function handleContactSave(
+    payload: SupplierContactPayload
+  ): Promise<void> {
+    if (!selectedSupplier) {
+      return;
+    }
+
+    setIsContactSaving(true);
+    setContactFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      if (editingContact) {
+        await supplierService.updateSupplierContact(
+          editingContact.id,
+          {
+            name: payload.name,
+            designation:
+              payload.designation,
+            department:
+              payload.department,
+            contact_type:
+              payload.contact_type,
+            email: payload.email,
+            phone: payload.phone,
+            alternate_phone:
+              payload.alternate_phone,
+            is_primary:
+              payload.is_primary,
+            is_active:
+              payload.is_active,
+            notes: payload.notes,
+          }
+        );
+
+        setSuccessMessage(
+          "Supplier contact updated successfully."
+        );
+      } else {
+        await supplierService.createSupplierContact(
+          payload
+        );
+
+        setSuccessMessage(
+          "Supplier contact created successfully."
+        );
+      }
+
+      setIsContactFormOpen(false);
+      setEditingContact(null);
+
+      await loadSupplierContacts(
+        selectedSupplier,
+        contactPagination.current_page
+      );
+    } catch (error) {
+      setContactFormErrors(
+        getValidationErrors(error)
+      );
+
+      setErrorMessage(
+        getApiMessage(
+          error,
+          "Unable to save the supplier contact."
+        )
+      );
+    } finally {
+      setIsContactSaving(false);
+    }
+  }
+
+  async function handleSupplierStatusChange(
     supplier: Supplier
   ): Promise<void> {
     setUpdatingSupplierId(supplier.id);
@@ -404,7 +769,8 @@ export default function SuppliersPage() {
       await supplierService.updateSupplier(
         supplier.id,
         {
-          is_active: !supplier.is_active,
+          is_active:
+            !supplier.is_active,
         }
       );
 
@@ -415,7 +781,7 @@ export default function SuppliersPage() {
       );
 
       await loadSuppliers(
-        pagination.current_page
+        supplierPagination.current_page
       );
     } catch (error) {
       setErrorMessage(
@@ -429,7 +795,91 @@ export default function SuppliersPage() {
     }
   }
 
-  async function handleDelete(
+  async function handleContactStatusChange(
+    contact: SupplierContact
+  ): Promise<void> {
+    if (!selectedSupplier) {
+      return;
+    }
+
+    setUpdatingContactId(contact.id);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await supplierService.updateSupplierContact(
+        contact.id,
+        {
+          is_active:
+            !contact.is_active,
+        }
+      );
+
+      setSuccessMessage(
+        contact.is_active
+          ? "Supplier contact deactivated successfully."
+          : "Supplier contact activated successfully."
+      );
+
+      await loadSupplierContacts(
+        selectedSupplier,
+        contactPagination.current_page
+      );
+    } catch (error) {
+      setErrorMessage(
+        getApiMessage(
+          error,
+          "Unable to update supplier contact status."
+        )
+      );
+    } finally {
+      setUpdatingContactId(null);
+    }
+  }
+
+  async function handleMakePrimary(
+    contact: SupplierContact
+  ): Promise<void> {
+    if (
+      !selectedSupplier ||
+      contact.is_primary
+    ) {
+      return;
+    }
+
+    setUpdatingContactId(contact.id);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await supplierService.updateSupplierContact(
+        contact.id,
+        {
+          is_primary: true,
+        }
+      );
+
+      setSuccessMessage(
+        "Primary supplier contact updated successfully."
+      );
+
+      await loadSupplierContacts(
+        selectedSupplier,
+        contactPagination.current_page
+      );
+    } catch (error) {
+      setErrorMessage(
+        getApiMessage(
+          error,
+          "Unable to update the primary contact."
+        )
+      );
+    } finally {
+      setUpdatingContactId(null);
+    }
+  }
+
+  async function handleSupplierDelete(
     supplier: Supplier
   ): Promise<void> {
     const confirmed = window.confirm(
@@ -455,9 +905,11 @@ export default function SuppliersPage() {
 
       const nextPage =
         suppliers.length === 1 &&
-        pagination.current_page > 1
-          ? pagination.current_page - 1
-          : pagination.current_page;
+        supplierPagination.current_page >
+          1
+          ? supplierPagination.current_page -
+            1
+          : supplierPagination.current_page;
 
       await loadSuppliers(nextPage);
     } catch (error) {
@@ -472,6 +924,57 @@ export default function SuppliersPage() {
     }
   }
 
+  async function handleContactDelete(
+    contact: SupplierContact
+  ): Promise<void> {
+    if (!selectedSupplier) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete "${contact.name}"? This will soft-delete the supplier contact.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingContactId(contact.id);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      await supplierService.deleteSupplierContact(
+        contact.id
+      );
+
+      setSuccessMessage(
+        "Supplier contact deleted successfully."
+      );
+
+      const nextPage =
+        supplierContacts.length === 1 &&
+        contactPagination.current_page > 1
+          ? contactPagination.current_page -
+            1
+          : contactPagination.current_page;
+
+      await loadSupplierContacts(
+        selectedSupplier,
+        nextPage
+      );
+    } catch (error) {
+      setErrorMessage(
+        getApiMessage(
+          error,
+          "Unable to delete the supplier contact."
+        )
+      );
+    } finally {
+      setDeletingContactId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col justify-between gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
@@ -481,16 +984,17 @@ export default function SuppliersPage() {
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            Manage supplier contact details,
-            branch access, payment terms,
-            balances, and operational status.
+            Manage supplier details,
+            contacts, branch access,
+            payment terms, balances, and
+            operational status.
           </p>
         </div>
 
-        {canCreate && (
+        {canCreateSupplier && (
           <button
             type="button"
-            onClick={openCreateForm}
+            onClick={openCreateSupplierForm}
             className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
             Add supplier
@@ -518,7 +1022,7 @@ export default function SuppliersPage() {
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <form
-          onSubmit={handleSearch}
+          onSubmit={handleSupplierSearch}
           className="grid gap-4 border-b border-slate-200 p-5 xl:grid-cols-[1fr_180px_180px_190px_auto]"
         >
           <input
@@ -528,7 +1032,7 @@ export default function SuppliersPage() {
               setSearch(event.target.value)
             }
             placeholder="Search supplier name, code, email or phone"
-            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:bg-slate-100 disabled:text-slate-500"
+            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
           />
 
           <select
@@ -605,7 +1109,7 @@ export default function SuppliersPage() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isSupplierLoading}
             className="h-11 rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-500"
           >
             Search
@@ -636,7 +1140,7 @@ export default function SuppliersPage() {
             </thead>
 
             <tbody className="divide-y divide-slate-200 bg-white">
-              {isLoading ? (
+              {isSupplierLoading ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -671,7 +1175,9 @@ export default function SuppliersPage() {
 
                       {supplier.business_name && (
                         <p className="mt-2 max-w-xs text-xs text-slate-500">
-                          {supplier.business_name}
+                          {
+                            supplier.business_name
+                          }
                         </p>
                       )}
                     </td>
@@ -680,11 +1186,17 @@ export default function SuppliersPage() {
                       {supplier.branch ? (
                         <>
                           <p className="text-sm font-medium text-slate-700">
-                            {supplier.branch.name}
+                            {
+                              supplier.branch
+                                .name
+                            }
                           </p>
 
                           <p className="mt-1 text-xs text-slate-500">
-                            {supplier.branch.code}
+                            {
+                              supplier.branch
+                                .code
+                            }
                           </p>
 
                           {supplier.branch
@@ -713,7 +1225,9 @@ export default function SuppliersPage() {
                       {supplier.alternate_phone && (
                         <p className="mt-1 text-xs text-slate-500">
                           Alt:{" "}
-                          {supplier.alternate_phone}
+                          {
+                            supplier.alternate_phone
+                          }
                         </p>
                       )}
                     </td>
@@ -772,12 +1286,26 @@ export default function SuppliersPage() {
 
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-2">
-                        {canUpdate && (
+                        {canViewContacts && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void openContactsPanel(
+                                supplier
+                              )
+                            }
+                            className="rounded-md border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                          >
+                            Contacts
+                          </button>
+                        )}
+
+                        {canUpdateSupplier && (
                           <>
                             <button
                               type="button"
                               onClick={() =>
-                                openEditForm(
+                                openEditSupplierForm(
                                   supplier
                                 )
                               }
@@ -795,7 +1323,7 @@ export default function SuppliersPage() {
                             <button
                               type="button"
                               onClick={() =>
-                                void handleStatusChange(
+                                void handleSupplierStatusChange(
                                   supplier
                                 )
                               }
@@ -817,11 +1345,11 @@ export default function SuppliersPage() {
                           </>
                         )}
 
-                        {canDelete && (
+                        {canDeleteSupplier && (
                           <button
                             type="button"
                             onClick={() =>
-                              void handleDelete(
+                              void handleSupplierDelete(
                                 supplier
                               )
                             }
@@ -840,8 +1368,9 @@ export default function SuppliersPage() {
                           </button>
                         )}
 
-                        {!canUpdate &&
-                          !canDelete && (
+                        {!canViewContacts &&
+                          !canUpdateSupplier &&
+                          !canDeleteSupplier && (
                             <span className="text-xs text-slate-400">
                               View only
                             </span>
@@ -857,21 +1386,24 @@ export default function SuppliersPage() {
 
         <div className="flex flex-col justify-between gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
           <p className="text-sm text-slate-500">
-            Showing {pagination.from ?? 0}–
-            {pagination.to ?? 0} of{" "}
-            {pagination.total} suppliers
+            Showing{" "}
+            {supplierPagination.from ?? 0}–
+            {supplierPagination.to ?? 0} of{" "}
+            {supplierPagination.total} suppliers
           </p>
 
           <div className="flex gap-2">
             <button
               type="button"
               disabled={
-                isLoading ||
-                pagination.current_page <= 1
+                isSupplierLoading ||
+                supplierPagination.current_page <=
+                  1
               }
               onClick={() =>
                 void loadSuppliers(
-                  pagination.current_page - 1
+                  supplierPagination.current_page -
+                    1
                 )
               }
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -881,20 +1413,22 @@ export default function SuppliersPage() {
 
             <span className="flex items-center px-3 text-sm text-slate-600">
               Page{" "}
-              {pagination.current_page} of{" "}
-              {pagination.last_page}
+              {supplierPagination.current_page}{" "}
+              of{" "}
+              {supplierPagination.last_page}
             </span>
 
             <button
               type="button"
               disabled={
-                isLoading ||
-                pagination.current_page >=
-                  pagination.last_page
+                isSupplierLoading ||
+                supplierPagination.current_page >=
+                  supplierPagination.last_page
               }
               onClick={() =>
                 void loadSuppliers(
-                  pagination.current_page + 1
+                  supplierPagination.current_page +
+                    1
                 )
               }
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -905,7 +1439,7 @@ export default function SuppliersPage() {
         </div>
       </section>
 
-      {isFormOpen && (
+      {isSupplierFormOpen && (
         <SupplierForm
           key={
             editingSupplier?.id ??
@@ -913,12 +1447,465 @@ export default function SuppliersPage() {
           }
           supplier={editingSupplier}
           branches={branches}
-          isSaving={isSaving}
-          errors={formErrors}
-          onCancel={closeForm}
-          onSubmit={handleSave}
+          isSaving={isSupplierSaving}
+          errors={supplierFormErrors}
+          onCancel={closeSupplierForm}
+          onSubmit={handleSupplierSave}
         />
       )}
+
+      {selectedSupplier && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="max-h-[94vh] w-full max-w-7xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div className="flex flex-col justify-between gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="text-xl font-bold text-slate-950">
+                  Supplier Contacts
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  {selectedSupplier.name} ·{" "}
+                  {selectedSupplier.code}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {canCreateContact && (
+                  <button
+                    type="button"
+                    onClick={openCreateContactForm}
+                    className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Add contact
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={closeContactsPanel}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <form
+              onSubmit={handleContactSearch}
+              className="grid gap-4 border-b border-slate-200 p-5 xl:grid-cols-[1fr_170px_170px_180px_auto]"
+            >
+              <input
+                type="search"
+                value={contactSearch}
+                onChange={(event) =>
+                  setContactSearch(
+                    event.target.value
+                  )
+                }
+                placeholder="Search contact name, email, phone or department"
+                className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+              />
+
+              <select
+                value={contactTypeFilter}
+                onChange={(event) =>
+                  setContactTypeFilter(
+                    event.target.value as
+                      | "all"
+                      | SupplierContactType
+                  )
+                }
+                className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+              >
+                <option value="all">
+                  All types
+                </option>
+
+                <option value="general">
+                  General
+                </option>
+
+                <option value="sales">
+                  Sales
+                </option>
+
+                <option value="accounts">
+                  Accounts
+                </option>
+
+                <option value="support">
+                  Support
+                </option>
+
+                <option value="management">
+                  Management
+                </option>
+              </select>
+
+              <select
+                value={contactStatusFilter}
+                onChange={(event) =>
+                  setContactStatusFilter(
+                    event.target.value as
+                      | "all"
+                      | "active"
+                      | "inactive"
+                  )
+                }
+                className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+              >
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="active">
+                  Active
+                </option>
+
+                <option value="inactive">
+                  Inactive
+                </option>
+              </select>
+
+              <select
+                value={primaryContactFilter}
+                onChange={(event) =>
+                  setPrimaryContactFilter(
+                    event.target.value as
+                      | "all"
+                      | "primary"
+                      | "non-primary"
+                  )
+                }
+                className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
+              >
+                <option value="all">
+                  All contacts
+                </option>
+
+                <option value="primary">
+                  Primary only
+                </option>
+
+                <option value="non-primary">
+                  Non-primary
+                </option>
+              </select>
+
+              <button
+                type="submit"
+                disabled={isContactLoading}
+                className="h-11 rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-500"
+              >
+                Search
+              </button>
+            </form>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    {[
+                      "Contact",
+                      "Type",
+                      "Communication",
+                      "Primary",
+                      "Status",
+                      "Actions",
+                    ].map((heading) => (
+                      <th
+                        key={heading}
+                        className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-200 bg-white">
+                  {isContactLoading ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-5 py-12 text-center text-sm text-slate-500"
+                      >
+                        Loading supplier contacts...
+                      </td>
+                    </tr>
+                  ) : supplierContacts.length ===
+                    0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-5 py-12 text-center text-sm text-slate-500"
+                      >
+                        No supplier contacts found.
+                      </td>
+                    </tr>
+                  ) : (
+                    supplierContacts.map(
+                      (contact) => (
+                        <tr
+                          key={contact.id}
+                          className="align-top"
+                        >
+                          <td className="px-5 py-4">
+                            <p className="font-semibold text-slate-900">
+                              {contact.name}
+                            </p>
+
+                            <p className="mt-1 text-xs text-slate-500">
+                              {contact.designation ??
+                                "No designation"}
+                            </p>
+
+                            {contact.department && (
+                              <p className="mt-1 text-xs text-slate-500">
+                                {
+                                  contact.department
+                                }
+                              </p>
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                              {formatContactType(
+                                contact.contact_type
+                              )}
+                            </span>
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            <p>
+                              {contact.email ??
+                                "—"}
+                            </p>
+
+                            <p className="mt-1">
+                              {contact.phone ??
+                                "—"}
+                            </p>
+
+                            {contact.alternate_phone && (
+                              <p className="mt-1 text-xs text-slate-500">
+                                Alt:{" "}
+                                {
+                                  contact.alternate_phone
+                                }
+                              </p>
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            {contact.is_primary ? (
+                              <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
+                                Primary
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-400">
+                                Standard
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                contact.is_active
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {contact.is_active
+                                ? "Active"
+                                : "Inactive"}
+                            </span>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="flex flex-wrap gap-2">
+                              {canUpdateContact && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      openEditContactForm(
+                                        contact
+                                      )
+                                    }
+                                    disabled={
+                                      updatingContactId ===
+                                        contact.id ||
+                                      deletingContactId ===
+                                        contact.id
+                                    }
+                                    className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    Edit
+                                  </button>
+
+                                  {!contact.is_primary && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        void handleMakePrimary(
+                                          contact
+                                        )
+                                      }
+                                      disabled={
+                                        updatingContactId ===
+                                          contact.id ||
+                                        deletingContactId ===
+                                          contact.id
+                                      }
+                                      className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      Make primary
+                                    </button>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      void handleContactStatusChange(
+                                        contact
+                                      )
+                                    }
+                                    disabled={
+                                      updatingContactId ===
+                                        contact.id ||
+                                      deletingContactId ===
+                                        contact.id
+                                    }
+                                    className="rounded-md border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {updatingContactId ===
+                                    contact.id
+                                      ? "Updating..."
+                                      : contact.is_active
+                                        ? "Deactivate"
+                                        : "Activate"}
+                                  </button>
+                                </>
+                              )}
+
+                              {canDeleteContact && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleContactDelete(
+                                      contact
+                                    )
+                                  }
+                                  disabled={
+                                    deletingContactId ===
+                                      contact.id ||
+                                    updatingContactId ===
+                                      contact.id
+                                  }
+                                  className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {deletingContactId ===
+                                  contact.id
+                                    ? "Deleting..."
+                                    : "Delete"}
+                                </button>
+                              )}
+
+                              {!canUpdateContact &&
+                                !canDeleteContact && (
+                                  <span className="text-xs text-slate-400">
+                                    View only
+                                  </span>
+                                )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col justify-between gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
+              <p className="text-sm text-slate-500">
+                Showing{" "}
+                {contactPagination.from ?? 0}–
+                {contactPagination.to ?? 0} of{" "}
+                {contactPagination.total} contacts
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={
+                    isContactLoading ||
+                    contactPagination.current_page <=
+                      1
+                  }
+                  onClick={() =>
+                    void loadSupplierContacts(
+                      selectedSupplier,
+                      contactPagination.current_page -
+                        1
+                    )
+                  }
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
+                </button>
+
+                <span className="flex items-center px-3 text-sm text-slate-600">
+                  Page{" "}
+                  {
+                    contactPagination.current_page
+                  }{" "}
+                  of{" "}
+                  {contactPagination.last_page}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={
+                    isContactLoading ||
+                    contactPagination.current_page >=
+                      contactPagination.last_page
+                  }
+                  onClick={() =>
+                    void loadSupplierContacts(
+                      selectedSupplier,
+                      contactPagination.current_page +
+                        1
+                    )
+                  }
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isContactFormOpen &&
+        selectedSupplier && (
+          <SupplierContactForm
+            key={
+              editingContact?.id ??
+              "new-supplier-contact"
+            }
+            supplier={selectedSupplier}
+            contact={editingContact}
+            isSaving={isContactSaving}
+            errors={contactFormErrors}
+            onCancel={closeContactForm}
+            onSubmit={handleContactSave}
+          />
+        )}
     </div>
   );
 }

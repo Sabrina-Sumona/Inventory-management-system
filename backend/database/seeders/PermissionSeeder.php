@@ -116,6 +116,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete supplier records.',
             ],
 
+            // Supplier Contact
+            [
+                'name' => 'View Supplier Contacts',
+                'code' => 'supplier-contact.view',
+                'module' => 'supplier-contact',
+                'action' => 'view',
+                'description' => 'View supplier contact records.',
+            ],
+            [
+                'name' => 'Create Supplier Contacts',
+                'code' => 'supplier-contact.create',
+                'module' => 'supplier-contact',
+                'action' => 'create',
+                'description' => 'Create new supplier contacts.',
+            ],
+            [
+                'name' => 'Update Supplier Contacts',
+                'code' => 'supplier-contact.update',
+                'module' => 'supplier-contact',
+                'action' => 'update',
+                'description' => 'Update supplier contact records.',
+            ],
+            [
+                'name' => 'Delete Supplier Contacts',
+                'code' => 'supplier-contact.delete',
+                'module' => 'supplier-contact',
+                'action' => 'delete',
+                'description' => 'Delete supplier contact records.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',
