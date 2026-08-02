@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SupplierContactController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\SupplierFinancialSettingController;
@@ -150,6 +151,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'update',
         'destroy',
     ]);
+
+    Route::get(
+        '/roles',
+        [
+            RoleController::class,
+            'index',
+        ]
+    );
 
     Route::apiResource(
         'users',

@@ -63,6 +63,12 @@ const navigationItems: NavigationItem[] = [
     icon: "supplier",
   },
   {
+    label: "Users",
+    href: "/dashboard/users",
+    permission: "user.view",
+    icon: "users",
+  },
+  {
     label: "User Assignments",
     href: "/dashboard/user-assignments",
     permission: "user.view",
@@ -92,6 +98,7 @@ function NavigationIcon({
           height="7"
           rx="1"
         />
+
         <rect
           x="14"
           y="3"
@@ -99,6 +106,7 @@ function NavigationIcon({
           height="7"
           rx="1"
         />
+
         <rect
           x="3"
           y="14"
@@ -106,6 +114,7 @@ function NavigationIcon({
           height="7"
           rx="1"
         />
+
         <rect
           x="14"
           y="14"
@@ -128,7 +137,9 @@ function NavigationIcon({
         aria-hidden="true"
       >
         <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
+
         <path d="M16 9h2a2 2 0 0 1 2 2v10" />
+
         <path d="M8 7h4M8 11h4M8 15h4M3 21h18" />
       </svg>
     );
@@ -149,17 +160,21 @@ function NavigationIcon({
           cy="5"
           r="2"
         />
+
         <circle
           cx="18"
           cy="7"
           r="2"
         />
+
         <circle
           cx="18"
           cy="17"
           r="2"
         />
+
         <path d="M8 5h3a3 3 0 0 1 3 3v6a3 3 0 0 0 3 3" />
+
         <path d="M14 10a3 3 0 0 1 3-3" />
       </svg>
     );
@@ -176,7 +191,9 @@ function NavigationIcon({
         aria-hidden="true"
       >
         <path d="M3 21V8l9-5 9 5v13" />
+
         <path d="M7 21v-8h10v8M7 10h10" />
+
         <path d="M10 17h4" />
       </svg>
     );
@@ -193,17 +210,21 @@ function NavigationIcon({
         aria-hidden="true"
       >
         <path d="M3 7h11v10H3z" />
+
         <path d="M14 10h3l4 4v3h-7z" />
+
         <circle
           cx="7"
           cy="19"
           r="2"
         />
+
         <circle
           cx="18"
           cy="19"
           r="2"
         />
+
         <path d="M5 7V5h7v2" />
       </svg>
     );
@@ -224,12 +245,15 @@ function NavigationIcon({
           cy="8"
           r="3"
         />
+
         <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+
         <circle
           cx="17"
           cy="9"
           r="2.5"
         />
+
         <path d="M15.5 14.5A5 5 0 0 1 21 20" />
       </svg>
     );
@@ -246,48 +270,66 @@ export function DashboardShell({
 
   const { user, logout } = useAuth();
 
-  const [isSidebarOpen, setIsSidebarOpen] =
-    useState(false);
+  const [
+    isSidebarOpen,
+    setIsSidebarOpen,
+  ] = useState(false);
 
-  const [isLoggingOut, setIsLoggingOut] =
-    useState(false);
+  const [
+    isLoggingOut,
+    setIsLoggingOut,
+  ] = useState(false);
 
   const permissionCodes = useMemo(
     () =>
       new Set(
         user?.permissions.map(
-          (permission) => permission.code
+          (permission) =>
+            permission.code
         ) ?? []
       ),
     [user]
   );
 
-  const visibleNavigationItems = useMemo(
-    () =>
-      navigationItems.filter(
-        (item) =>
-          !item.permission ||
-          permissionCodes.has(item.permission)
-      ),
-    [permissionCodes]
-  );
+  const visibleNavigationItems =
+    useMemo(
+      () =>
+        navigationItems.filter(
+          (item) =>
+            !item.permission ||
+            permissionCodes.has(
+              item.permission
+            )
+        ),
+      [permissionCodes]
+    );
 
   const currentNavigationItem =
-    visibleNavigationItems.find((item) => {
-      if (item.href === "/dashboard") {
-        return pathname === "/dashboard";
-      }
+    visibleNavigationItems.find(
+      (item) => {
+        if (
+          item.href === "/dashboard"
+        ) {
+          return pathname === "/dashboard";
+        }
 
-      return pathname.startsWith(item.href);
-    });
+        return pathname.startsWith(
+          item.href
+        );
+      }
+    );
 
   const pageTitle =
-    currentNavigationItem?.label ?? "Dashboard";
+    currentNavigationItem?.label ??
+    "Dashboard";
 
   const primaryRole =
-    user?.roles[0]?.name ?? "No role assigned";
+    user?.roles[0]?.name ??
+    "No role assigned";
 
-  function isActive(href: string): boolean {
+  function isActive(
+    href: string
+  ): boolean {
     if (href === "/dashboard") {
       return pathname === "/dashboard";
     }
@@ -387,16 +429,17 @@ export function DashboardShell({
           >
             {visibleNavigationItems.map(
               (item) => {
-                const active = isActive(
-                  item.href
-                );
+                const active =
+                  isActive(item.href);
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() =>
-                      setIsSidebarOpen(false)
+                      setIsSidebarOpen(
+                        false
+                      )
                     }
                     className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
                       active
@@ -408,7 +451,9 @@ export function DashboardShell({
                       name={item.icon}
                     />
 
-                    <span>{item.label}</span>
+                    <span>
+                      {item.label}
+                    </span>
                   </Link>
                 );
               }
