@@ -156,6 +156,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         UserController::class
     )->only([
         'index',
+        'store',
         'show',
     ]);
 
