@@ -18,6 +18,7 @@ import type { Company } from "@/types/company";
 import type { Role } from "@/types/role";
 import type {
   CreateUserPayload,
+  UpdateUserPayload,
   User,
   UserPagination,
   UserQuery,
@@ -100,6 +101,11 @@ export default function UsersPage() {
 
   const [companies, setCompanies] =
     useState<Company[]>([]);
+
+  const [
+    editingUser,
+    setEditingUser,
+  ] = useState<User | null>(null);
 
   const [pagination, setPagination] =
     useState<UserPagination>(
@@ -334,6 +340,7 @@ export default function UsersPage() {
   }
 
   async function openCreateUserForm(): Promise<void> {
+    setEditingUser(null);
     setFormErrors({});
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -343,12 +350,28 @@ export default function UsersPage() {
     await loadRoles(null);
   }
 
+  async function openEditUserForm(
+    selectedUser: User
+  ): Promise<void> {
+    setEditingUser(selectedUser);
+    setFormErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setRoles([]);
+    setIsUserFormOpen(true);
+
+    await loadRoles(
+      selectedUser.company_id
+    );
+  }
+
   function closeUserForm(): void {
     if (isUserSaving) {
       return;
     }
 
     setIsUserFormOpen(false);
+    setEditingUser(null);
     setRoles([]);
     setFormErrors({});
   }
@@ -359,8 +382,10 @@ export default function UsersPage() {
     await loadRoles(companyId);
   }
 
-  async function handleCreateUser(
-    payload: CreateUserPayload
+  async function handleSaveUser(
+    payload:
+      | CreateUserPayload
+      | UpdateUserPayload
   ): Promise<void> {
     setIsUserSaving(true);
     setFormErrors({});
@@ -368,15 +393,27 @@ export default function UsersPage() {
     setSuccessMessage(null);
 
     try {
-      await userService.createUser(
-        payload
-      );
+      if (editingUser) {
+        await userService.updateUser(
+          editingUser.id,
+          payload as UpdateUserPayload
+        );
 
-      setSuccessMessage(
-        "User created successfully."
-      );
+        setSuccessMessage(
+          "User updated successfully."
+        );
+      } else {
+        await userService.createUser(
+          payload as CreateUserPayload
+        );
+
+        setSuccessMessage(
+          "User created successfully."
+        );
+      }
 
       setIsUserFormOpen(false);
+      setEditingUser(null);
       setRoles([]);
 
       await loadUsers(
@@ -390,7 +427,9 @@ export default function UsersPage() {
       setErrorMessage(
         getApiMessage(
           error,
-          "Unable to create the user."
+          editingUser
+            ? "Unable to update the user."
+            : "Unable to create the user."
         )
       );
     } finally {
@@ -612,14 +651,10 @@ export default function UsersPage() {
                           {user.roles.map(
                             (role) => (
                               <span
-                                key={
-                                  role.id
-                                }
+                                key={role.id}
                                 className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800"
                               >
-                                {
-                                  role.name
-                                }
+                                {role.name}
                               </span>
                             )
                           )}
@@ -663,9 +698,17 @@ export default function UsersPage() {
                         </Link>
 
                         {canUpdateUser ? (
-                          <span className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-400">
-                            Edit coming next
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void openEditUserForm(
+                                user
+                              )
+                            }
+                            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Edit
+                          </button>
                         ) : (
                           <span className="text-xs text-slate-400">
                             View only
@@ -734,7 +777,11 @@ export default function UsersPage() {
 
       {isUserFormOpen && (
         <UserForm
-          key="new-user"
+          key={
+            editingUser?.id ??
+            "new-user"
+          }
+          user={editingUser}
           roles={roles}
           companies={companies}
           isSuperAdmin={isSuperAdmin}
@@ -745,7 +792,7 @@ export default function UsersPage() {
             handleCompanyChange
           }
           onCancel={closeUserForm}
-          onSubmit={handleCreateUser}
+          onSubmit={handleSaveUser}
         />
       )}
     </div>

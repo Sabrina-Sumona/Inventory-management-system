@@ -167,6 +167,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         'index',
         'store',
         'show',
+        'update',
     ]);
 
     Route::get(

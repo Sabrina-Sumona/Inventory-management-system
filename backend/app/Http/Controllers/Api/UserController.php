@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +278,110 @@ class UserController extends Controller
         ]);
     }
 
+    public function update(
+        UpdateUserRequest $request,
+        User $user
+    ): JsonResponse {
+        $validated =
+            $request->validated();
+
+        /** @var User $authenticatedUser */
+        $authenticatedUser =
+            $request->user();
+
+        $companyId =
+            $this->resolveUpdatedCompanyId(
+                $authenticatedUser,
+                $user,
+                $validated['company_id']
+                    ?? null
+            );
+
+        $roles = Role::query()
+            ->whereIn(
+                'id',
+                $validated['role_ids']
+            )
+            ->get();
+
+        $this->validateRolesForUser(
+            $roles,
+            $companyId
+        );
+
+        DB::transaction(
+            function () use (
+                $user,
+                $validated,
+                $companyId,
+                $roles,
+                $authenticatedUser
+            ): void {
+                $companyChanged =
+                    $user->company_id === null
+                        ? $companyId !== null
+                        : $companyId === null
+                            || (int) $user->company_id
+                                !== $companyId;
+
+                $user->update([
+                    'company_id' =>
+                        $companyId,
+
+                    'name' =>
+                        $validated['name'],
+
+                    'email' =>
+                        $validated['email'],
+                ]);
+
+                $roleSyncData = [];
+
+                foreach ($roles as $role) {
+                    $roleSyncData[$role->id] = [
+                        'assigned_by' =>
+                            $authenticatedUser->id,
+                    ];
+                }
+
+                $user->roles()->sync(
+                    $roleSyncData
+                );
+
+                if ($companyChanged) {
+                    $user->warehouses()
+                        ->detach();
+
+                    $user->branches()
+                        ->detach();
+                }
+            }
+        );
+
+        $user
+            ->refresh()
+            ->load([
+                'company:id,name,code',
+                'roles:id,name,code',
+            ])
+            ->loadCount([
+                'branches',
+                'warehouses',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+                'User updated successfully.',
+
+            'data' => [
+                'user' => (
+                    new UserResource($user)
+                )->resolve($request),
+            ],
+        ]);
+    }
+
     private function resolveCompanyId(
         User $authenticatedUser,
         mixed $requestedCompanyId
@@ -317,8 +423,55 @@ class UserController extends Controller
             : null;
     }
 
+    private function resolveUpdatedCompanyId(
+        User $authenticatedUser,
+        User $targetUser,
+        mixed $requestedCompanyId
+    ): ?int {
+        if (
+            ! $authenticatedUser->isSuperAdmin()
+        ) {
+            if (
+                $authenticatedUser->company_id
+                    === null
+                || $targetUser->company_id
+                    === null
+            ) {
+                throw ValidationException::withMessages([
+                    'company_id' => [
+                        'The user must belong to your company.',
+                    ],
+                ]);
+            }
+
+            if (
+                $requestedCompanyId !== null
+                && (int) $requestedCompanyId
+                    !==
+                    (int) $authenticatedUser
+                        ->company_id
+            ) {
+                throw ValidationException::withMessages([
+                    'company_id' => [
+                        'You cannot move a user to another company.',
+                    ],
+                ]);
+            }
+
+            return (int)
+                $authenticatedUser->company_id;
+        }
+
+        return $requestedCompanyId !== null
+            ? (int) $requestedCompanyId
+            : null;
+    }
+
+    /**
+     * @param Collection<int, Role> $roles
+     */
     private function validateRolesForUser(
-        $roles,
+        Collection $roles,
         ?int $companyId
     ): void {
         foreach ($roles as $role) {

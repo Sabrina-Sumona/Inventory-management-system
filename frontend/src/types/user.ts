@@ -81,3 +81,10 @@ export interface CreateUserPayload {
   password_confirmation: string;
   role_ids: number[];
 }
+
+export interface UpdateUserPayload {
+  company_id?: number | null;
+  name: string;
+  email: string;
+  role_ids: number[];
+}

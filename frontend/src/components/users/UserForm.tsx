@@ -6,7 +6,11 @@ import {
 } from "react";
 
 import type { Role } from "@/types/role";
-import type { CreateUserPayload } from "@/types/user";
+import type {
+  CreateUserPayload,
+  UpdateUserPayload,
+  User,
+} from "@/types/user";
 
 interface UserCompanyOption {
   id: number;
@@ -24,34 +28,63 @@ interface UserFormValues {
 }
 
 interface UserFormProps {
+  user: User | null;
   roles: Role[];
   companies?: UserCompanyOption[];
   isSuperAdmin: boolean;
   isSaving: boolean;
   isLoadingRoles?: boolean;
   errors: Record<string, string>;
+
   onCompanyChange?: (
     companyId: number | null
   ) => Promise<void> | void;
+
   onCancel: () => void;
+
   onSubmit: (
-    payload: CreateUserPayload
+    payload:
+      | CreateUserPayload
+      | UpdateUserPayload
   ) => Promise<void>;
 }
 
 const inputClassName =
   "h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
 
-const emptyForm: UserFormValues = {
-  companyId: "",
-  name: "",
-  email: "",
-  password: "",
-  passwordConfirmation: "",
-  roleIds: [],
-};
+function userToForm(
+  user: User | null
+): UserFormValues {
+  if (!user) {
+    return {
+      companyId: "",
+      name: "",
+      email: "",
+      password: "",
+      passwordConfirmation: "",
+      roleIds: [],
+    };
+  }
+
+  return {
+    companyId:
+      user.company_id === null
+        ? ""
+        : String(user.company_id),
+
+    name: user.name,
+    email: user.email,
+    password: "",
+    passwordConfirmation: "",
+
+    roleIds: user.roles.map(
+      (role) => role.id
+    ),
+  };
+}
 
 export function UserForm({
+  user,
   roles,
   companies = [],
   isSuperAdmin,
@@ -62,8 +95,12 @@ export function UserForm({
   onCancel,
   onSubmit,
 }: UserFormProps) {
+  const isEditing = user !== null;
+
   const [form, setForm] =
-    useState<UserFormValues>(emptyForm);
+    useState<UserFormValues>(
+      userToForm(user)
+    );
 
   const [
     isPasswordVisible,
@@ -94,17 +131,23 @@ export function UserForm({
     updateField("roleIds", []);
 
     const companyId =
-      value === "" ? null : Number(value);
+      value === ""
+        ? null
+        : Number(value);
 
     if (
       companyId !== null &&
-      (!Number.isInteger(companyId) ||
-        companyId <= 0)
+      (
+        !Number.isInteger(companyId) ||
+        companyId <= 0
+      )
     ) {
       return;
     }
 
-    await onCompanyChange?.(companyId);
+    await onCompanyChange?.(
+      companyId
+    );
   }
 
   function handleRoleChange(
@@ -136,9 +179,10 @@ export function UserForm({
   ): Promise<void> {
     event.preventDefault();
 
-    const normalizedEmail = form.email
-      .trim()
-      .toLowerCase();
+    const normalizedEmail =
+      form.email
+        .trim()
+        .toLowerCase();
 
     const companyId =
       form.companyId === ""
@@ -147,13 +191,33 @@ export function UserForm({
 
     if (
       companyId !== null &&
-      (!Number.isInteger(companyId) ||
-        companyId <= 0)
+      (
+        !Number.isInteger(companyId) ||
+        companyId <= 0
+      )
     ) {
       return;
     }
 
-    await onSubmit({
+    if (isEditing) {
+      const payload: UpdateUserPayload = {
+        ...(isSuperAdmin
+          ? {
+              company_id: companyId,
+            }
+          : {}),
+
+        name: form.name.trim(),
+        email: normalizedEmail,
+        role_ids: form.roleIds,
+      };
+
+      await onSubmit(payload);
+
+      return;
+    }
+
+    const payload: CreateUserPayload = {
       ...(isSuperAdmin
         ? {
             company_id: companyId,
@@ -168,18 +232,26 @@ export function UserForm({
         form.passwordConfirmation,
 
       role_ids: form.roleIds,
-    });
+    };
+
+    await onSubmit(payload);
   }
+
+  const passwordIsValid =
+    isEditing ||
+    (
+      form.password.length >= 8 &&
+      form.passwordConfirmation.length >=
+        8 &&
+      form.password ===
+        form.passwordConfirmation
+    );
 
   const canSubmit =
     form.name.trim() !== "" &&
     form.email.trim() !== "" &&
-    form.password.length >= 8 &&
-    form.passwordConfirmation.length >=
-      8 &&
-    form.password ===
-      form.passwordConfirmation &&
     form.roleIds.length > 0 &&
+    passwordIsValid &&
     !isSaving &&
     !isLoadingRoles;
 
@@ -189,14 +261,15 @@ export function UserForm({
         <header className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
           <div>
             <h2 className="text-xl font-bold text-slate-950">
-              Create user
+              {isEditing
+                ? "Edit user"
+                : "Create user"}
             </h2>
 
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Create an internal account and
-              assign the appropriate access
-              role. Branch and warehouse access
-              can be configured afterward.
+              {isEditing
+                ? "Update the user’s account details, company, and assigned roles."
+                : "Create an internal account and assign the appropriate access role. Branch and warehouse access can be configured afterward."}
             </p>
           </div>
 
@@ -260,11 +333,11 @@ export function UserForm({
                   </select>
 
                   <p className="mt-2 text-xs leading-5 text-slate-500">
-                    Global accounts can only
-                    receive active global system
-                    roles. Select a company to
-                    create a company-specific
-                    user.
+                    Changing the company removes
+                    the user’s existing branch
+                    and warehouse assignments.
+                    Global accounts can only use
+                    active global system roles.
                   </p>
 
                   {errors.company_id && (
@@ -360,148 +433,162 @@ export function UserForm({
               </div>
             </section>
 
-            <section>
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
-                Initial password
-              </h3>
+            {!isEditing && (
+              <section>
+                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
+                  Initial password
+                </h3>
 
-              <div className="grid gap-5 md:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="user-password"
-                    className="mb-2 block text-sm font-medium text-slate-700"
-                  >
-                    Password
-                  </label>
-
-                  <div className="relative">
-                    <input
-                      id="user-password"
-                      name="password"
-                      type={
-                        isPasswordVisible
-                          ? "text"
-                          : "password"
-                      }
-                      required
-                      minLength={8}
-                      autoComplete="new-password"
-                      value={form.password}
-                      onChange={(event) =>
-                        updateField(
-                          "password",
-                          event.target.value
-                        )
-                      }
-                      disabled={isSaving}
-                      aria-invalid={Boolean(
-                        errors.password
-                      )}
-                      className={`${inputClassName} pr-20`}
-                      placeholder="Create a secure password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setIsPasswordVisible(
-                          (current) => !current
-                        )
-                      }
-                      disabled={isSaving}
-                      className="absolute inset-y-0 right-0 flex items-center px-4 text-sm font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="user-password"
+                      className="mb-2 block text-sm font-medium text-slate-700"
                     >
-                      {isPasswordVisible
-                        ? "Hide"
-                        : "Show"}
-                    </button>
-                  </div>
+                      Password
+                    </label>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-500">
-                    Use at least 8 characters,
-                    including uppercase,
-                    lowercase, and numbers.
-                  </p>
+                    <div className="relative">
+                      <input
+                        id="user-password"
+                        name="password"
+                        type={
+                          isPasswordVisible
+                            ? "text"
+                            : "password"
+                        }
+                        required
+                        minLength={8}
+                        autoComplete="new-password"
+                        value={form.password}
+                        onChange={(event) =>
+                          updateField(
+                            "password",
+                            event.target.value
+                          )
+                        }
+                        disabled={isSaving}
+                        aria-invalid={Boolean(
+                          errors.password
+                        )}
+                        className={`${inputClassName} pr-20`}
+                        placeholder="Create a secure password"
+                      />
 
-                  {errors.password && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.password}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setIsPasswordVisible(
+                            (current) =>
+                              !current
+                          )
+                        }
+                        disabled={isSaving}
+                        aria-label={
+                          isPasswordVisible
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                        className="absolute inset-y-0 right-0 flex items-center px-4 text-sm font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isPasswordVisible
+                          ? "Hide"
+                          : "Show"}
+                      </button>
+                    </div>
+
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Use at least 8 characters,
+                      including uppercase,
+                      lowercase, and numbers.
                     </p>
-                  )}
-                </div>
 
-                <div>
-                  <label
-                    htmlFor="user-password-confirmation"
-                    className="mb-2 block text-sm font-medium text-slate-700"
-                  >
-                    Confirm password
-                  </label>
-
-                  <div className="relative">
-                    <input
-                      id="user-password-confirmation"
-                      name="password_confirmation"
-                      type={
-                        isConfirmationVisible
-                          ? "text"
-                          : "password"
-                      }
-                      required
-                      minLength={8}
-                      autoComplete="new-password"
-                      value={
-                        form.passwordConfirmation
-                      }
-                      onChange={(event) =>
-                        updateField(
-                          "passwordConfirmation",
-                          event.target.value
-                        )
-                      }
-                      disabled={isSaving}
-                      aria-invalid={Boolean(
-                        errors.password_confirmation
-                      )}
-                      className={`${inputClassName} pr-20`}
-                      placeholder="Repeat the password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setIsConfirmationVisible(
-                          (current) => !current
-                        )
-                      }
-                      disabled={isSaving}
-                      className="absolute inset-y-0 right-0 flex items-center px-4 text-sm font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isConfirmationVisible
-                        ? "Hide"
-                        : "Show"}
-                    </button>
-                  </div>
-
-                  {form.passwordConfirmation !==
-                    "" &&
-                    form.password !==
-                      form.passwordConfirmation && (
+                    {errors.password && (
                       <p className="mt-2 text-sm text-red-600">
-                        Passwords do not match.
+                        {errors.password}
                       </p>
                     )}
+                  </div>
 
-                  {errors.password_confirmation && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {
-                        errors.password_confirmation
-                      }
-                    </p>
-                  )}
+                  <div>
+                    <label
+                      htmlFor="user-password-confirmation"
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                      Confirm password
+                    </label>
+
+                    <div className="relative">
+                      <input
+                        id="user-password-confirmation"
+                        name="password_confirmation"
+                        type={
+                          isConfirmationVisible
+                            ? "text"
+                            : "password"
+                        }
+                        required
+                        minLength={8}
+                        autoComplete="new-password"
+                        value={
+                          form.passwordConfirmation
+                        }
+                        onChange={(event) =>
+                          updateField(
+                            "passwordConfirmation",
+                            event.target.value
+                          )
+                        }
+                        disabled={isSaving}
+                        aria-invalid={Boolean(
+                          errors.password_confirmation
+                        )}
+                        className={`${inputClassName} pr-20`}
+                        placeholder="Repeat the password"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setIsConfirmationVisible(
+                            (current) =>
+                              !current
+                          )
+                        }
+                        disabled={isSaving}
+                        aria-label={
+                          isConfirmationVisible
+                            ? "Hide password confirmation"
+                            : "Show password confirmation"
+                        }
+                        className="absolute inset-y-0 right-0 flex items-center px-4 text-sm font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isConfirmationVisible
+                          ? "Hide"
+                          : "Show"}
+                      </button>
+                    </div>
+
+                    {form.passwordConfirmation !==
+                      "" &&
+                      form.password !==
+                        form.passwordConfirmation && (
+                        <p className="mt-2 text-sm text-red-600">
+                          Passwords do not match.
+                        </p>
+                      )}
+
+                    {errors.password_confirmation && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {
+                          errors.password_confirmation
+                        }
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             <section>
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
@@ -608,8 +695,12 @@ export function UserForm({
               )}
 
               {isSaving
-                ? "Creating..."
-                : "Create user"}
+                ? isEditing
+                  ? "Saving..."
+                  : "Creating..."
+                : isEditing
+                  ? "Save changes"
+                  : "Create user"}
             </button>
           </footer>
         </form>
