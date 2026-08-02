@@ -1,8 +1,10 @@
 import { api } from "@/lib/api";
 
 import type {
+  CreateUserPayload,
   User,
   UserListResponse,
+  UserMutationResponse,
   UserQuery,
   UserResponse,
 } from "@/types/user";
@@ -41,6 +43,18 @@ export const userService = {
     const response =
       await api.get<UserResponse>(
         `/api/users/${userId}`
+      );
+
+    return response.data.data.user;
+  },
+
+  async createUser(
+    payload: CreateUserPayload
+  ): Promise<User> {
+    const response =
+      await api.post<UserMutationResponse>(
+        "/api/users",
+        payload
       );
 
     return response.data.data.user;

@@ -49,14 +49,35 @@ export interface UserResponse {
   };
 }
 
+export interface UserMutationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+  };
+}
+
 export interface UserQuery {
   search?: string;
+
   sort_by?:
     | "name"
     | "email"
     | "created_at"
     | "updated_at";
+
   sort_direction?: "asc" | "desc";
+
   per_page?: number;
+
   page?: number;
+}
+
+export interface CreateUserPayload {
+  company_id?: number | null;
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  role_ids: number[];
 }
