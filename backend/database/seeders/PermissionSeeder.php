@@ -176,6 +176,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete supplier financial settings.',
             ],
 
+            // Customer
+            [
+                'name' => 'View Customers',
+                'code' => 'customer.view',
+                'module' => 'customer',
+                'action' => 'view',
+                'description' => 'View customer records.',
+            ],
+            [
+                'name' => 'Create Customers',
+                'code' => 'customer.create',
+                'module' => 'customer',
+                'action' => 'create',
+                'description' => 'Create new customers.',
+            ],
+            [
+                'name' => 'Update Customers',
+                'code' => 'customer.update',
+                'module' => 'customer',
+                'action' => 'update',
+                'description' => 'Update customer records.',
+            ],
+            [
+                'name' => 'Delete Customers',
+                'code' => 'customer.delete',
+                'module' => 'customer',
+                'action' => 'delete',
+                'description' => 'Delete customer records.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',
@@ -258,7 +288,10 @@ class PermissionSeeder extends Seeder
         }
 
         Permission::query()
-            ->where('module', 'warehouse-location')
+            ->where(
+                'module',
+                'warehouse-location'
+            )
             ->delete();
     }
 }

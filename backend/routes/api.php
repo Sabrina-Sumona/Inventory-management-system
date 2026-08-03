@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SupplierContactController;
 use App\Http\Controllers\Api\SupplierController;
@@ -17,11 +18,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health', function () {
     return response()->json([
         'success' => true,
+
         'message' =>
             'Inventory Management API is running.',
+
         'data' => [
-            'service' => 'Laravel API',
-            'status' => 'healthy',
+            'service' =>
+                'Laravel API',
+
+            'status' =>
+                'healthy',
         ],
     ]);
 });
@@ -29,7 +35,9 @@ Route::get('/health', function () {
 Route::post('/auth/login', [
     AuthenticatedSessionController::class,
     'store',
-])->middleware('throttle:login');
+])->middleware(
+    'throttle:login'
+);
 
 Route::post('/auth/forgot-password', [
     PasswordResetController::class,
@@ -84,7 +92,9 @@ Route::middleware(
             BranchController::class,
             'restore',
         ]
-    )->whereNumber('branch');
+    )->whereNumber(
+        'branch'
+    );
 
     Route::post(
         '/warehouses/{warehouse}/restore',
@@ -92,7 +102,9 @@ Route::middleware(
             WarehouseController::class,
             'restore',
         ]
-    )->whereNumber('warehouse');
+    )->whereNumber(
+        'warehouse'
+    );
 
     Route::apiResource(
         'warehouses',
@@ -111,7 +123,9 @@ Route::middleware(
             SupplierController::class,
             'restore',
         ]
-    )->whereNumber('supplier');
+    )->whereNumber(
+        'supplier'
+    );
 
     Route::apiResource(
         'suppliers',
@@ -166,6 +180,27 @@ Route::middleware(
             'destroy',
         ]);
 
+    Route::post(
+        '/customers/{customer}/restore',
+        [
+            CustomerController::class,
+            'restore',
+        ]
+    )->whereNumber(
+        'customer'
+    );
+
+    Route::apiResource(
+        'customers',
+        CustomerController::class
+    )->only([
+        'index',
+        'store',
+        'show',
+        'update',
+        'destroy',
+    ]);
+
     Route::get(
         '/roles',
         [
@@ -180,7 +215,9 @@ Route::middleware(
             UserController::class,
             'deactivate',
         ]
-    )->whereNumber('user');
+    )->whereNumber(
+        'user'
+    );
 
     Route::patch(
         '/users/{user}/activate',
@@ -188,7 +225,9 @@ Route::middleware(
             UserController::class,
             'activate',
         ]
-    )->whereNumber('user');
+    )->whereNumber(
+        'user'
+    );
 
     Route::apiResource(
         'users',
@@ -206,7 +245,9 @@ Route::middleware(
             UserAssignmentController::class,
             'show',
         ]
-    )->whereNumber('user');
+    )->whereNumber(
+        'user'
+    );
 
     Route::put(
         '/users/{user}/branch-assignments',
@@ -214,7 +255,9 @@ Route::middleware(
             UserAssignmentController::class,
             'syncBranches',
         ]
-    )->whereNumber('user');
+    )->whereNumber(
+        'user'
+    );
 
     Route::put(
         '/users/{user}/warehouse-assignments',
@@ -222,5 +265,7 @@ Route::middleware(
             UserAssignmentController::class,
             'syncWarehouses',
         ]
-    )->whereNumber('user');
+    )->whereNumber(
+        'user'
+    );
 });

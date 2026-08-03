@@ -11,10 +11,12 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        $company = Company::where(
-            'code',
-            'DESH-SOLAR'
-        )->firstOrFail();
+        $company = Company::query()
+            ->where(
+                'code',
+                'DESH-SOLAR'
+            )
+            ->firstOrFail();
 
         $roles = [
             [
@@ -29,9 +31,10 @@ class RoleSeeder extends Seeder
             [
                 'company_id' => $company->id,
                 'name' => 'Company Admin',
-                'code' => 'DESH-SOLAR-COMPANY-ADMIN',
+                'code' =>
+                    'DESH-SOLAR-COMPANY-ADMIN',
                 'description' =>
-                    'Manages Desh Solar organization, warehouses, suppliers, users, and access control.',
+                    'Manages Desh Solar organization, warehouses, suppliers, customers, users, and access control.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -62,6 +65,11 @@ class RoleSeeder extends Seeder
                     'supplier-financial-setting.update',
                     'supplier-financial-setting.delete',
 
+                    'customer.view',
+                    'customer.create',
+                    'customer.update',
+                    'customer.delete',
+
                     'user.view',
                     'user.create',
                     'user.update',
@@ -78,9 +86,10 @@ class RoleSeeder extends Seeder
             [
                 'company_id' => $company->id,
                 'name' => 'Inventory Manager',
-                'code' => 'DESH-SOLAR-INVENTORY-MANAGER',
+                'code' =>
+                    'DESH-SOLAR-INVENTORY-MANAGER',
                 'description' =>
-                    'Manages inventory operations, warehouse records, supplier information, supplier contacts, and supplier financial settings.',
+                    'Manages inventory operations, warehouse records, suppliers, customers, supplier contacts, and supplier financial settings.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -102,6 +111,10 @@ class RoleSeeder extends Seeder
                     'supplier-financial-setting.create',
                     'supplier-financial-setting.update',
 
+                    'customer.view',
+                    'customer.create',
+                    'customer.update',
+
                     'user.view',
                     'role.view',
                 ],
@@ -109,9 +122,10 @@ class RoleSeeder extends Seeder
             [
                 'company_id' => $company->id,
                 'name' => 'Warehouse Manager',
-                'code' => 'DESH-SOLAR-WAREHOUSE-MANAGER',
+                'code' =>
+                    'DESH-SOLAR-WAREHOUSE-MANAGER',
                 'description' =>
-                    'Manages assigned warehouse operations and views supplier information, contacts, and financial settings.',
+                    'Manages assigned warehouse operations and views permitted supplier, customer, contact, and financial information.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -123,14 +137,17 @@ class RoleSeeder extends Seeder
                     'supplier.view',
                     'supplier-contact.view',
                     'supplier-financial-setting.view',
+
+                    'customer.view',
                 ],
             ],
             [
                 'company_id' => $company->id,
                 'name' => 'Storekeeper',
-                'code' => 'DESH-SOLAR-STOREKEEPER',
+                'code' =>
+                    'DESH-SOLAR-STOREKEEPER',
                 'description' =>
-                    'Handles day-to-day warehouse inventory operations and views permitted supplier information.',
+                    'Handles day-to-day warehouse inventory operations and views permitted supplier and customer information.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -140,14 +157,17 @@ class RoleSeeder extends Seeder
                     'supplier.view',
                     'supplier-contact.view',
                     'supplier-financial-setting.view',
+
+                    'customer.view',
                 ],
             ],
             [
                 'company_id' => $company->id,
                 'name' => 'Viewer',
-                'code' => 'DESH-SOLAR-VIEWER',
+                'code' =>
+                    'DESH-SOLAR-VIEWER',
                 'description' =>
-                    'Read-only access to permitted organization, supplier, contact, and financial-setting records.',
+                    'Read-only access to permitted organization, supplier, customer, contact, and financial-setting records.',
                 'is_system' => false,
                 'permissions' => [
                     'company.view',
@@ -157,6 +177,8 @@ class RoleSeeder extends Seeder
                     'supplier.view',
                     'supplier-contact.view',
                     'supplier-financial-setting.view',
+
+                    'customer.view',
                 ],
             ],
         ];
@@ -165,17 +187,21 @@ class RoleSeeder extends Seeder
             $permissionCodes =
                 $roleData['permissions'];
 
-            unset($roleData['permissions']);
-
-            $role = Role::updateOrCreate(
-                [
-                    'code' => $roleData['code'],
-                ],
-                [
-                    ...$roleData,
-                    'is_active' => true,
-                ]
+            unset(
+                $roleData['permissions']
             );
+
+            $role = Role::query()
+                ->updateOrCreate(
+                    [
+                        'code' =>
+                            $roleData['code'],
+                    ],
+                    [
+                        ...$roleData,
+                        'is_active' => true,
+                    ]
+                );
 
             $permissionIds =
                 $permissionCodes === '*'
@@ -198,9 +224,11 @@ class RoleSeeder extends Seeder
                         ->pluck('id')
                         ->all();
 
-            $role->permissions()->sync(
-                $permissionIds
-            );
+            $role
+                ->permissions()
+                ->sync(
+                    $permissionIds
+                );
         }
     }
 }

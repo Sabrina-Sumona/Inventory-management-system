@@ -34,30 +34,52 @@ class SupplierContactManagementTest extends TestCase
             PermissionSeeder::class
         );
 
-        $this->company = Company::query()->create([
-            'name' => 'Desh Solar',
-            'code' => 'DESH-SOLAR',
-            'email' => 'info@deshsolar.com',
-            'phone' => '01700000000',
-            'is_active' => true,
-        ]);
+        $this->company =
+            Company::query()->create([
+                'name' => 'Desh Solar',
+                'code' => 'DESH-SOLAR',
+                'email' =>
+                    'info@deshsolar.com',
+                'phone' =>
+                    '01700000000',
+                'is_active' => true,
+            ]);
 
-        $this->branch = Branch::query()->create([
-            'company_id' => $this->company->id,
-            'name' => 'Desh Solar Head Office',
-            'code' => 'DS-HO',
-            'email' => 'headoffice@deshsolar.com',
-            'phone' => '01700000001',
-            'address' => 'Dhaka',
-            'is_active' => true,
-        ]);
+        $this->branch =
+            Branch::query()->create([
+                'company_id' =>
+                    $this->company->id,
 
-        $this->companyAdmin = User::query()->create([
-            'company_id' => $this->company->id,
-            'name' => 'Company Admin',
-            'email' => 'admin@deshsolar.com',
-            'password' => 'password',
-        ]);
+                'name' =>
+                    'Desh Solar Head Office',
+
+                'code' => 'DS-HO',
+
+                'email' =>
+                    'headoffice@deshsolar.com',
+
+                'phone' =>
+                    '01700000001',
+
+                'address' => 'Dhaka',
+
+                'is_active' => true,
+            ]);
+
+        $this->companyAdmin =
+            User::query()->create([
+                'company_id' =>
+                    $this->company->id,
+
+                'name' =>
+                    'Company Admin',
+
+                'email' =>
+                    'admin@deshsolar.com',
+
+                'password' =>
+                    'password',
+            ]);
 
         $this->companyAdmin
             ->branches()
@@ -70,32 +92,45 @@ class SupplierContactManagementTest extends TestCase
                 ]
             );
 
-        $role = Role::query()->create([
-            'company_id' => $this->company->id,
-            'name' => 'Company Admin',
-            'code' => 'TEST-COMPANY-ADMIN',
-            'description' => 'Test company administrator.',
-            'is_system' => false,
-            'is_active' => true,
-        ]);
+        $role =
+            Role::query()->create([
+                'company_id' =>
+                    $this->company->id,
 
-        $permissionIds = Permission::query()
-            ->whereIn('code', [
-                'supplier.view',
-                'supplier.create',
-                'supplier.update',
-                'supplier.delete',
-                'supplier-contact.view',
-                'supplier-contact.create',
-                'supplier-contact.update',
-                'supplier-contact.delete',
-            ])
-            ->pluck('id')
-            ->all();
+                'name' =>
+                    'Company Admin',
 
-        $role->permissions()->sync(
-            $permissionIds
-        );
+                'code' =>
+                    'TEST-COMPANY-ADMIN',
+
+                'description' =>
+                    'Test company administrator.',
+
+                'is_system' => false,
+                'is_active' => true,
+            ]);
+
+        $permissionIds =
+            Permission::query()
+                ->whereIn(
+                    'code',
+                    [
+                        'supplier.view',
+                        'supplier.create',
+                        'supplier.update',
+                        'supplier.delete',
+                        'supplier-contact.view',
+                        'supplier-contact.create',
+                        'supplier-contact.update',
+                        'supplier-contact.delete',
+                    ]
+                )
+                ->pluck('id')
+                ->all();
+
+        $role
+            ->permissions()
+            ->sync($permissionIds);
 
         $this->companyAdmin
             ->roles()
@@ -107,23 +142,50 @@ class SupplierContactManagementTest extends TestCase
                 ]
             );
 
-        $this->supplier = Supplier::query()->create([
-            'company_id' => $this->company->id,
-            'branch_id' => $this->branch->id,
-            'name' => 'Walton',
-            'code' => 'WALTON',
-            'business_name' => 'Walton Hi-Tech Industries PLC',
-            'email' => 'supplier@walton.com',
-            'phone' => '01700000002',
-            'country' => 'Bangladesh',
-            'payment_term_days' => 30,
-            'credit_limit' => 1000000,
-            'opening_balance' => 0,
-            'opening_balance_type' => 'payable',
-            'is_active' => true,
-            'created_by' => $this->companyAdmin->id,
-            'updated_by' => $this->companyAdmin->id,
-        ]);
+        $this->supplier =
+            Supplier::query()->create([
+                'company_id' =>
+                    $this->company->id,
+
+                'branch_id' =>
+                    $this->branch->id,
+
+                'name' => 'Walton',
+
+                'code' => 'WALTON',
+
+                'business_name' =>
+                    'Walton Hi-Tech Industries PLC',
+
+                'email' =>
+                    'supplier@walton.com',
+
+                'phone' =>
+                    '01700000002',
+
+                'country' =>
+                    'Bangladesh',
+
+                'payment_term_days' =>
+                    30,
+
+                'credit_limit' =>
+                    1000000,
+
+                'opening_balance' =>
+                    0,
+
+                'opening_balance_type' =>
+                    'payable',
+
+                'is_active' => true,
+
+                'created_by' =>
+                    $this->companyAdmin->id,
+
+                'updated_by' =>
+                    $this->companyAdmin->id,
+            ]);
 
         Sanctum::actingAs(
             $this->companyAdmin
@@ -133,16 +195,33 @@ class SupplierContactManagementTest extends TestCase
     public function test_authorized_user_can_list_supplier_contacts(): void
     {
         SupplierContact::query()->create([
-            'supplier_id' => $this->supplier->id,
-            'name' => 'Rahim Ahmed',
-            'designation' => 'Sales Manager',
-            'contact_type' => 'sales',
-            'email' => 'rahim@walton.com',
-            'phone' => '01710000000',
+            'supplier_id' =>
+                $this->supplier->id,
+
+            'name' =>
+                'Rahim Ahmed',
+
+            'designation' =>
+                'Sales Manager',
+
+            'contact_type' =>
+                'sales',
+
+            'email' =>
+                'rahim@walton.com',
+
+            'phone' =>
+                '01710000000',
+
             'is_primary' => true,
+
             'is_active' => true,
-            'created_by' => $this->companyAdmin->id,
-            'updated_by' => $this->companyAdmin->id,
+
+            'created_by' =>
+                $this->companyAdmin->id,
+
+            'updated_by' =>
+                $this->companyAdmin->id,
         ]);
 
         $response = $this->getJson(
@@ -168,17 +247,35 @@ class SupplierContactManagementTest extends TestCase
     public function test_authorized_user_can_create_supplier_contact(): void
     {
         $payload = [
-            'supplier_id' => $this->supplier->id,
+            'supplier_id' =>
+                $this->supplier->id,
+
             'name' => 'Karim Hasan',
-            'designation' => 'Account Officer',
-            'department' => 'Accounts',
-            'contact_type' => 'accounts',
-            'email' => 'karim@walton.com',
-            'phone' => '01720000000',
-            'alternate_phone' => '01820000000',
+
+            'designation' =>
+                'Account Officer',
+
+            'department' =>
+                'Accounts',
+
+            'contact_type' =>
+                'accounts',
+
+            'email' =>
+                'karim@walton.com',
+
+            'phone' =>
+                '01720000000',
+
+            'alternate_phone' =>
+                '01820000000',
+
             'is_primary' => true,
+
             'is_active' => true,
-            'notes' => 'Primary accounts contact.',
+
+            'notes' =>
+                'Primary accounts contact.',
         ];
 
         $response = $this->postJson(
@@ -206,9 +303,15 @@ class SupplierContactManagementTest extends TestCase
             [
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Karim Hasan',
-                'contact_type' => 'accounts',
-                'is_primary' => true,
+
+                'name' =>
+                    'Karim Hasan',
+
+                'contact_type' =>
+                    'accounts',
+
+                'is_primary' =>
+                    true,
             ]
         );
     }
@@ -219,12 +322,22 @@ class SupplierContactManagementTest extends TestCase
             SupplierContact::query()->create([
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Previous Primary',
-                'contact_type' => 'sales',
-                'is_primary' => true,
-                'is_active' => true,
+
+                'name' =>
+                    'Previous Primary',
+
+                'contact_type' =>
+                    'sales',
+
+                'is_primary' =>
+                    true,
+
+                'is_active' =>
+                    true,
+
                 'created_by' =>
                     $this->companyAdmin->id,
+
                 'updated_by' =>
                     $this->companyAdmin->id,
             ]);
@@ -234,10 +347,18 @@ class SupplierContactManagementTest extends TestCase
             [
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'New Primary',
-                'contact_type' => 'management',
-                'is_primary' => true,
-                'is_active' => true,
+
+                'name' =>
+                    'New Primary',
+
+                'contact_type' =>
+                    'management',
+
+                'is_primary' =>
+                    true,
+
+                'is_active' =>
+                    true,
             ]
         );
 
@@ -246,8 +367,11 @@ class SupplierContactManagementTest extends TestCase
         $this->assertDatabaseHas(
             'supplier_contacts',
             [
-                'id' => $existingPrimary->id,
-                'is_primary' => false,
+                'id' =>
+                    $existingPrimary->id,
+
+                'is_primary' =>
+                    false,
             ]
         );
 
@@ -256,8 +380,12 @@ class SupplierContactManagementTest extends TestCase
             [
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'New Primary',
-                'is_primary' => true,
+
+                'name' =>
+                    'New Primary',
+
+                'is_primary' =>
+                    true,
             ]
         );
     }
@@ -268,12 +396,22 @@ class SupplierContactManagementTest extends TestCase
             SupplierContact::query()->create([
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Support Contact',
-                'contact_type' => 'support',
-                'is_primary' => false,
-                'is_active' => true,
+
+                'name' =>
+                    'Support Contact',
+
+                'contact_type' =>
+                    'support',
+
+                'is_primary' =>
+                    false,
+
+                'is_active' =>
+                    true,
+
                 'created_by' =>
                     $this->companyAdmin->id,
+
                 'updated_by' =>
                     $this->companyAdmin->id,
             ]);
@@ -300,12 +438,22 @@ class SupplierContactManagementTest extends TestCase
             SupplierContact::query()->create([
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Old Contact Name',
-                'contact_type' => 'general',
-                'is_primary' => false,
-                'is_active' => true,
+
+                'name' =>
+                    'Old Contact Name',
+
+                'contact_type' =>
+                    'general',
+
+                'is_primary' =>
+                    false,
+
+                'is_active' =>
+                    true,
+
                 'created_by' =>
                     $this->companyAdmin->id,
+
                 'updated_by' =>
                     $this->companyAdmin->id,
             ]);
@@ -313,9 +461,14 @@ class SupplierContactManagementTest extends TestCase
         $response = $this->patchJson(
             "/api/supplier-contacts/{$contact->id}",
             [
-                'name' => 'Updated Contact Name',
-                'contact_type' => 'sales',
-                'designation' => 'Senior Sales Executive',
+                'name' =>
+                    'Updated Contact Name',
+
+                'contact_type' =>
+                    'sales',
+
+                'designation' =>
+                    'Senior Sales Executive',
             ]
         );
 
@@ -334,8 +487,12 @@ class SupplierContactManagementTest extends TestCase
             'supplier_contacts',
             [
                 'id' => $contact->id,
-                'name' => 'Updated Contact Name',
-                'contact_type' => 'sales',
+
+                'name' =>
+                    'Updated Contact Name',
+
+                'contact_type' =>
+                    'sales',
             ]
         );
     }
@@ -346,12 +503,22 @@ class SupplierContactManagementTest extends TestCase
             SupplierContact::query()->create([
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Delete Contact',
-                'contact_type' => 'general',
-                'is_primary' => false,
-                'is_active' => true,
+
+                'name' =>
+                    'Delete Contact',
+
+                'contact_type' =>
+                    'general',
+
+                'is_primary' =>
+                    false,
+
+                'is_active' =>
+                    true,
+
                 'created_by' =>
                     $this->companyAdmin->id,
+
                 'updated_by' =>
                     $this->companyAdmin->id,
             ]);
@@ -381,12 +548,22 @@ class SupplierContactManagementTest extends TestCase
             SupplierContact::query()->create([
                 'supplier_id' =>
                     $this->supplier->id,
-                'name' => 'Restore Contact',
-                'contact_type' => 'general',
-                'is_primary' => false,
-                'is_active' => true,
+
+                'name' =>
+                    'Restore Contact',
+
+                'contact_type' =>
+                    'general',
+
+                'is_primary' =>
+                    false,
+
+                'is_active' =>
+                    true,
+
                 'created_by' =>
                     $this->companyAdmin->id,
+
                 'updated_by' =>
                     $this->companyAdmin->id,
             ]);
@@ -424,10 +601,14 @@ class SupplierContactManagementTest extends TestCase
             [
                 'supplier_id' =>
                     $this->supplier->id,
+
                 'name' => '',
+
                 'contact_type' =>
                     'invalid-type',
-                'email' => 'invalid-email',
+
+                'email' =>
+                    'invalid-email',
             ]
         );
 
@@ -446,10 +627,15 @@ class SupplierContactManagementTest extends TestCase
             User::query()->create([
                 'company_id' =>
                     $this->company->id,
-                'name' => 'Unauthorized User',
+
+                'name' =>
+                    'Unauthorized User',
+
                 'email' =>
                     'unauthorized@deshsolar.com',
-                'password' => 'password',
+
+                'password' =>
+                    'password',
             ]);
 
         Sanctum::actingAs(
@@ -467,36 +653,76 @@ class SupplierContactManagementTest extends TestCase
     {
         $otherCompany =
             Company::query()->create([
-                'name' => 'Other Company',
-                'code' => 'OTHER-COMPANY',
-                'email' => 'info@other.com',
-                'phone' => '01900000000',
+                'name' =>
+                    'Other Company',
+
+                'code' =>
+                    'OTHER-COMPANY',
+
+                'email' =>
+                    'info@other.com',
+
+                'phone' =>
+                    '01900000000',
+
                 'is_active' => true,
             ]);
 
         $otherBranch =
             Branch::query()->create([
-                'company_id' => $otherCompany->id,
-                'name' => 'Other Branch',
-                'code' => 'OTHER-BRANCH',
-                'email' => 'branch@other.com',
-                'phone' => '01900000001',
-                'address' => 'Chattogram',
-                'is_active' => true,
+                'company_id' =>
+                    $otherCompany->id,
+
+                'name' =>
+                    'Other Branch',
+
+                'code' =>
+                    'OTHER-BRANCH',
+
+                'email' =>
+                    'branch@other.com',
+
+                'phone' =>
+                    '01900000001',
+
+                'address' =>
+                    'Chattogram',
+
+                'is_active' =>
+                    true,
             ]);
 
         $otherSupplier =
             Supplier::query()->create([
-                'company_id' => $otherCompany->id,
-                'branch_id' => $otherBranch->id,
-                'name' => 'Other Supplier',
-                'code' => 'OTHER-SUPPLIER',
-                'country' => 'Bangladesh',
-                'payment_term_days' => 0,
-                'credit_limit' => 0,
-                'opening_balance' => 0,
-                'opening_balance_type' => 'payable',
-                'is_active' => true,
+                'company_id' =>
+                    $otherCompany->id,
+
+                'branch_id' =>
+                    $otherBranch->id,
+
+                'name' =>
+                    'Other Supplier',
+
+                'code' =>
+                    'OTHER-SUPPLIER',
+
+                'country' =>
+                    'Bangladesh',
+
+                'payment_term_days' =>
+                    0,
+
+                'credit_limit' =>
+                    0,
+
+                'opening_balance' =>
+                    0,
+
+                'opening_balance_type' =>
+                    'payable',
+
+                'is_active' =>
+                    true,
             ]);
 
         $response = $this->postJson(
@@ -504,8 +730,12 @@ class SupplierContactManagementTest extends TestCase
             [
                 'supplier_id' =>
                     $otherSupplier->id,
-                'name' => 'Unauthorized Contact',
-                'contact_type' => 'general',
+
+                'name' =>
+                    'Unauthorized Contact',
+
+                'contact_type' =>
+                    'general',
             ]
         );
 
@@ -522,37 +752,72 @@ class SupplierContactManagementTest extends TestCase
             Supplier::query()->create([
                 'company_id' =>
                     $this->company->id,
+
                 'branch_id' =>
                     $this->branch->id,
-                'name' => 'Second Supplier',
-                'code' => 'SECOND-SUPPLIER',
-                'country' => 'Bangladesh',
-                'payment_term_days' => 0,
-                'credit_limit' => 0,
-                'opening_balance' => 0,
-                'opening_balance_type' => 'payable',
-                'is_active' => true,
+
+                'name' =>
+                    'Second Supplier',
+
+                'code' =>
+                    'SECOND-SUPPLIER',
+
+                'country' =>
+                    'Bangladesh',
+
+                'payment_term_days' =>
+                    0,
+
+                'credit_limit' =>
+                    0,
+
+                'opening_balance' =>
+                    0,
+
+                'opening_balance_type' =>
+                    'payable',
+
+                'is_active' =>
+                    true,
             ]);
 
         SupplierContact::query()->create([
-            'supplier_id' => $this->supplier->id,
-            'name' => 'Walton Contact',
-            'contact_type' => 'sales',
-            'is_primary' => true,
-            'is_active' => true,
+            'supplier_id' =>
+                $this->supplier->id,
+
+            'name' =>
+                'Walton Contact',
+
+            'contact_type' =>
+                'sales',
+
+            'is_primary' =>
+                true,
+
+            'is_active' =>
+                true,
         ]);
 
         SupplierContact::query()->create([
-            'supplier_id' => $secondSupplier->id,
-            'name' => 'Second Supplier Contact',
-            'contact_type' => 'general',
-            'is_primary' => true,
-            'is_active' => true,
+            'supplier_id' =>
+                $secondSupplier->id,
+
+            'name' =>
+                'Second Supplier Contact',
+
+            'contact_type' =>
+                'general',
+
+            'is_primary' =>
+                true,
+
+            'is_active' =>
+                true,
         ]);
 
         $response = $this->getJson(
-            '/api/supplier-contacts?supplier_id=' .
-            $this->supplier->id
+            '/api/supplier-contacts?supplier_id='
+            . $this->supplier->id
         );
 
         $response

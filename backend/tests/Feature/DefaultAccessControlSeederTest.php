@@ -14,11 +14,13 @@ class DefaultAccessControlSeederTest extends TestCase
 
     public function test_default_permissions_and_roles_are_seeded(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(
+            DatabaseSeeder::class
+        );
 
         $this->assertDatabaseCount(
             'permissions',
-            31
+            35
         );
 
         $this->assertDatabaseCount(
@@ -26,104 +28,210 @@ class DefaultAccessControlSeederTest extends TestCase
             6
         );
 
-        $this->assertDatabaseHas('roles', [
-            'code' => 'SUPER-ADMIN',
-            'company_id' => null,
-            'is_system' => true,
-            'is_active' => true,
-        ]);
+        $this->assertDatabaseHas(
+            'roles',
+            [
+                'code' => 'SUPER-ADMIN',
+                'company_id' => null,
+                'is_system' => true,
+                'is_active' => true,
+            ]
+        );
 
-        $this->assertDatabaseHas('roles', [
-            'code' =>
-                'DESH-SOLAR-WAREHOUSE-MANAGER',
-            'is_active' => true,
-        ]);
+        $this->assertDatabaseHas(
+            'roles',
+            [
+                'code' =>
+                    'DESH-SOLAR-WAREHOUSE-MANAGER',
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'warehouse.view',
-            'module' => 'warehouse',
-            'action' => 'view',
-        ]);
+                'is_active' => true,
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier.view',
-            'module' => 'supplier',
-            'action' => 'view',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'warehouse.view',
+                'module' => 'warehouse',
+                'action' => 'view',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier.create',
-            'module' => 'supplier',
-            'action' => 'create',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'supplier.view',
+                'module' => 'supplier',
+                'action' => 'view',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier.update',
-            'module' => 'supplier',
-            'action' => 'update',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'supplier.create',
+                'module' => 'supplier',
+                'action' => 'create',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier.delete',
-            'module' => 'supplier',
-            'action' => 'delete',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'supplier.update',
+                'module' => 'supplier',
+                'action' => 'update',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier-contact.view',
-            'module' => 'supplier-contact',
-            'action' => 'view',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'supplier.delete',
+                'module' => 'supplier',
+                'action' => 'delete',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier-contact.create',
-            'module' => 'supplier-contact',
-            'action' => 'create',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-contact.view',
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier-contact.update',
-            'module' => 'supplier-contact',
-            'action' => 'update',
-        ]);
+                'module' =>
+                    'supplier-contact',
 
-        $this->assertDatabaseHas('permissions', [
-            'code' => 'supplier-contact.delete',
-            'module' => 'supplier-contact',
-            'action' => 'delete',
-        ]);
+                'action' => 'view',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' =>
-                'supplier-financial-setting.view',
-            'module' =>
-                'supplier-financial-setting',
-            'action' => 'view',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-contact.create',
 
-        $this->assertDatabaseHas('permissions', [
-            'code' =>
-                'supplier-financial-setting.create',
-            'module' =>
-                'supplier-financial-setting',
-            'action' => 'create',
-        ]);
+                'module' =>
+                    'supplier-contact',
 
-        $this->assertDatabaseHas('permissions', [
-            'code' =>
-                'supplier-financial-setting.update',
-            'module' =>
-                'supplier-financial-setting',
-            'action' => 'update',
-        ]);
+                'action' => 'create',
+            ]
+        );
 
-        $this->assertDatabaseHas('permissions', [
-            'code' =>
-                'supplier-financial-setting.delete',
-            'module' =>
-                'supplier-financial-setting',
-            'action' => 'delete',
-        ]);
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-contact.update',
+
+                'module' =>
+                    'supplier-contact',
+
+                'action' => 'update',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-contact.delete',
+
+                'module' =>
+                    'supplier-contact',
+
+                'action' => 'delete',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-financial-setting.view',
+
+                'module' =>
+                    'supplier-financial-setting',
+
+                'action' => 'view',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-financial-setting.create',
+
+                'module' =>
+                    'supplier-financial-setting',
+
+                'action' => 'create',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-financial-setting.update',
+
+                'module' =>
+                    'supplier-financial-setting',
+
+                'action' => 'update',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'supplier-financial-setting.delete',
+
+                'module' =>
+                    'supplier-financial-setting',
+
+                'action' => 'delete',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'customer.view',
+                'module' => 'customer',
+                'action' => 'view',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'customer.create',
+                'module' => 'customer',
+                'action' => 'create',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'customer.update',
+                'module' => 'customer',
+                'action' => 'update',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' => 'customer.delete',
+                'module' => 'customer',
+                'action' => 'delete',
+            ]
+        );
 
         $this->assertDatabaseMissing(
             'permissions',
@@ -136,15 +244,19 @@ class DefaultAccessControlSeederTest extends TestCase
 
     public function test_super_admin_receives_every_permission(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(
+            DatabaseSeeder::class
+        );
 
-        $superAdmin = Role::where(
-            'code',
-            'SUPER-ADMIN'
-        )->firstOrFail();
+        $superAdmin = Role::query()
+            ->where(
+                'code',
+                'SUPER-ADMIN'
+            )
+            ->firstOrFail();
 
         $this->assertSame(
-            Permission::count(),
+            Permission::query()->count(),
             $superAdmin
                 ->permissions()
                 ->count()
@@ -153,12 +265,16 @@ class DefaultAccessControlSeederTest extends TestCase
 
     public function test_warehouse_manager_receives_expected_permissions(): void
     {
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(
+            DatabaseSeeder::class
+        );
 
-        $role = Role::where(
-            'code',
-            'DESH-SOLAR-WAREHOUSE-MANAGER'
-        )->firstOrFail();
+        $role = Role::query()
+            ->where(
+                'code',
+                'DESH-SOLAR-WAREHOUSE-MANAGER'
+            )
+            ->firstOrFail();
 
         $this->assertTrue(
             $role->hasPermission(
@@ -265,12 +381,17 @@ class DefaultAccessControlSeederTest extends TestCase
 
     public function test_seeders_can_run_more_than_once_without_duplicates(): void
     {
-        $this->seed(DatabaseSeeder::class);
-        $this->seed(DatabaseSeeder::class);
+        $this->seed(
+            DatabaseSeeder::class
+        );
+
+        $this->seed(
+            DatabaseSeeder::class
+        );
 
         $this->assertDatabaseCount(
             'permissions',
-            31
+            35
         );
 
         $this->assertDatabaseCount(
@@ -279,33 +400,44 @@ class DefaultAccessControlSeederTest extends TestCase
         );
 
         $warehouseViewPermission =
-            Permission::where(
-                'code',
-                'warehouse.view'
-            )->firstOrFail();
+            Permission::query()
+                ->where(
+                    'code',
+                    'warehouse.view'
+                )
+                ->firstOrFail();
 
         $supplierViewPermission =
-            Permission::where(
-                'code',
-                'supplier.view'
-            )->firstOrFail();
+            Permission::query()
+                ->where(
+                    'code',
+                    'supplier.view'
+                )
+                ->firstOrFail();
 
         $supplierContactViewPermission =
-            Permission::where(
-                'code',
-                'supplier-contact.view'
-            )->firstOrFail();
+            Permission::query()
+                ->where(
+                    'code',
+                    'supplier-contact.view'
+                )
+                ->firstOrFail();
 
         $supplierFinancialSettingViewPermission =
-            Permission::where(
-                'code',
-                'supplier-financial-setting.view'
-            )->firstOrFail();
+            Permission::query()
+                ->where(
+                    'code',
+                    'supplier-financial-setting.view'
+                )
+                ->firstOrFail();
 
-        $warehouseManager = Role::where(
-            'code',
-            'DESH-SOLAR-WAREHOUSE-MANAGER'
-        )->firstOrFail();
+        $warehouseManager =
+            Role::query()
+                ->where(
+                    'code',
+                    'DESH-SOLAR-WAREHOUSE-MANAGER'
+                )
+                ->firstOrFail();
 
         $this->assertDatabaseHas(
             'role_permission',

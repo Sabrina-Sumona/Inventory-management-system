@@ -39,17 +39,30 @@ class Branch extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(
+            Company::class
+        );
     }
 
     public function warehouses(): HasMany
     {
-        return $this->hasMany(Warehouse::class);
+        return $this->hasMany(
+            Warehouse::class
+        );
     }
 
     public function suppliers(): HasMany
     {
-        return $this->hasMany(Supplier::class);
+        return $this->hasMany(
+            Supplier::class
+        );
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(
+            Customer::class
+        );
     }
 
     public function users(): BelongsToMany
@@ -74,7 +87,9 @@ class Branch extends Model
         }
 
         if ($user->company_id === null) {
-            return $query->whereRaw('1 = 0');
+            return $query->whereRaw(
+                '1 = 0'
+            );
         }
 
         return $query
@@ -84,8 +99,8 @@ class Branch extends Model
             )
             ->whereHas(
                 'users',
-                fn (Builder $userQuery) => $userQuery
-                    ->where(
+                fn (Builder $userQuery) =>
+                    $userQuery->where(
                         'users.id',
                         $user->id
                     )
