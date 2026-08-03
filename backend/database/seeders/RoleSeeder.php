@@ -39,7 +39,7 @@ class RoleSeeder extends Seeder
                     'DESH-SOLAR-COMPANY-ADMIN',
 
                 'description' =>
-                    'Manages Desh Solar organization, warehouses, suppliers, customers, customer contacts, users, and access control.',
+                    'Manages Desh Solar organization, warehouses, suppliers, customers, contacts, financial settings, users, and access control.',
 
                 'is_system' =>
                     false,
@@ -83,6 +83,11 @@ class RoleSeeder extends Seeder
                     'customer-contact.update',
                     'customer-contact.delete',
 
+                    'customer-financial-setting.view',
+                    'customer-financial-setting.create',
+                    'customer-financial-setting.update',
+                    'customer-financial-setting.delete',
+
                     'user.view',
                     'user.create',
                     'user.update',
@@ -107,7 +112,7 @@ class RoleSeeder extends Seeder
                     'DESH-SOLAR-INVENTORY-MANAGER',
 
                 'description' =>
-                    'Manages inventory operations, warehouse records, suppliers, customers, supplier contacts, customer contacts, and supplier financial settings.',
+                    'Manages inventory operations, warehouse records, suppliers, customers, contacts, and supplier and customer financial settings.',
 
                 'is_system' =>
                     false,
@@ -139,6 +144,10 @@ class RoleSeeder extends Seeder
                     'customer-contact.view',
                     'customer-contact.create',
                     'customer-contact.update',
+
+                    'customer-financial-setting.view',
+                    'customer-financial-setting.create',
+                    'customer-financial-setting.update',
 
                     'user.view',
                     'role.view',
@@ -173,6 +182,7 @@ class RoleSeeder extends Seeder
 
                     'customer.view',
                     'customer-contact.view',
+                    'customer-financial-setting.view',
                 ],
             ],
             [
@@ -186,7 +196,7 @@ class RoleSeeder extends Seeder
                     'DESH-SOLAR-STOREKEEPER',
 
                 'description' =>
-                    'Handles day-to-day warehouse inventory operations and views permitted supplier, customer, and contact information.',
+                    'Handles day-to-day warehouse inventory operations and views permitted supplier, customer, contact, and financial information.',
 
                 'is_system' =>
                     false,
@@ -202,6 +212,7 @@ class RoleSeeder extends Seeder
 
                     'customer.view',
                     'customer-contact.view',
+                    'customer-financial-setting.view',
                 ],
             ],
             [
@@ -231,6 +242,7 @@ class RoleSeeder extends Seeder
 
                     'customer.view',
                     'customer-contact.view',
+                    'customer-financial-setting.view',
                 ],
             ],
         ];

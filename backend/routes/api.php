@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\CustomerContactController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\CustomerFinancialSettingController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SupplierContactController;
 use App\Http\Controllers\Api\SupplierController;
@@ -219,6 +220,22 @@ Route::middleware(
         ->parameters([
             'customer-contacts' =>
                 'customerContact',
+        ])
+        ->only([
+            'index',
+            'store',
+            'show',
+            'update',
+            'destroy',
+        ]);
+
+    Route::apiResource(
+        'customer-financial-settings',
+        CustomerFinancialSettingController::class
+    )
+        ->parameters([
+            'customer-financial-settings' =>
+                'customerFinancialSetting',
         ])
         ->only([
             'index',

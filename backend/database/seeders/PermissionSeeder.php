@@ -236,6 +236,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete customer contact records.',
             ],
 
+            // Customer Financial Settings
+            [
+                'name' => 'View Customer Financial Settings',
+                'code' => 'customer-financial-setting.view',
+                'module' => 'customer-financial-setting',
+                'action' => 'view',
+                'description' => 'View customer financial settings.',
+            ],
+            [
+                'name' => 'Create Customer Financial Settings',
+                'code' => 'customer-financial-setting.create',
+                'module' => 'customer-financial-setting',
+                'action' => 'create',
+                'description' => 'Create customer financial settings.',
+            ],
+            [
+                'name' => 'Update Customer Financial Settings',
+                'code' => 'customer-financial-setting.update',
+                'module' => 'customer-financial-setting',
+                'action' => 'update',
+                'description' => 'Update customer financial settings.',
+            ],
+            [
+                'name' => 'Delete Customer Financial Settings',
+                'code' => 'customer-financial-setting.delete',
+                'module' => 'customer-financial-setting',
+                'action' => 'delete',
+                'description' => 'Delete customer financial settings.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',

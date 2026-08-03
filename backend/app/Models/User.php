@@ -147,6 +147,22 @@ class User extends Authenticatable
         );
     }
 
+    public function createdCustomerFinancialSettings(): HasMany
+    {
+        return $this->hasMany(
+            CustomerFinancialSetting::class,
+            'created_by'
+        );
+    }
+
+    public function updatedCustomerFinancialSettings(): HasMany
+    {
+        return $this->hasMany(
+            CustomerFinancialSetting::class,
+            'updated_by'
+        );
+    }
+
     public function hasRole(
         string $roleCode
     ): bool {
