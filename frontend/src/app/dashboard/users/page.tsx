@@ -107,6 +107,11 @@ export default function UsersPage() {
     setEditingUser,
   ] = useState<User | null>(null);
 
+  const [
+    changingStatusUserId,
+    setChangingStatusUserId,
+  ] = useState<number | null>(null);
+
   const [pagination, setPagination] =
     useState<UserPagination>(
       emptyPagination
@@ -185,6 +190,15 @@ export default function UsersPage() {
       (permission) =>
         permission.code ===
         "user.update"
+    ) ??
+      false);
+
+  const canDeactivateUser =
+    isSuperAdmin ||
+    (authenticatedUser?.permissions.some(
+      (permission) =>
+        permission.code ===
+        "user.deactivate"
     ) ??
       false);
 
@@ -437,6 +451,64 @@ export default function UsersPage() {
     }
   }
 
+  async function handleUserStatusChange(
+    selectedUser: User
+  ): Promise<void> {
+    const action = selectedUser.is_active
+      ? "deactivate"
+      : "activate";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} ${selectedUser.name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setChangingStatusUserId(
+      selectedUser.id
+    );
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const updatedUser =
+        selectedUser.is_active
+          ? await userService.deactivateUser(
+              selectedUser.id
+            )
+          : await userService.activateUser(
+              selectedUser.id
+            );
+
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === updatedUser.id
+            ? updatedUser
+            : user
+        )
+      );
+
+      setSuccessMessage(
+        selectedUser.is_active
+          ? "User deactivated successfully."
+          : "User activated successfully."
+      );
+    } catch (error) {
+      setErrorMessage(
+        getApiMessage(
+          error,
+          selectedUser.is_active
+            ? "Unable to deactivate the user."
+            : "Unable to activate the user."
+        )
+      );
+    } finally {
+      setChangingStatusUserId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col justify-between gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
@@ -560,6 +632,7 @@ export default function UsersPage() {
               <tr>
                 {[
                   "User",
+                  "Status",
                   "Company",
                   "Roles",
                   "Assignments",
@@ -580,7 +653,7 @@ export default function UsersPage() {
               {isUserLoading ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-5 py-12 text-center text-sm text-slate-500"
                   >
                     Loading users...
@@ -589,135 +662,197 @@ export default function UsersPage() {
               ) : users.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-5 py-12 text-center text-sm text-slate-500"
                   >
                     No users found.
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="align-top"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-800">
-                          {user.name
-                            .charAt(0)
-                            .toUpperCase()}
+                users.map((user) => {
+                  const isCurrentUser =
+                    authenticatedUser?.id ===
+                    user.id;
+
+                  const isUserSuperAdmin =
+                    user.roles.some(
+                      (role) =>
+                        role.code ===
+                        "SUPER-ADMIN"
+                    );
+
+                  const isStatusChanging =
+                    changingStatusUserId ===
+                    user.id;
+
+                  return (
+                    <tr
+                      key={user.id}
+                      className="align-top"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-800">
+                            {user.name
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-900">
+                              {user.name}
+                            </p>
+
+                            <p className="mt-1 break-all text-sm text-slate-500">
+                              {user.email}
+                            </p>
+                          </div>
                         </div>
+                      </td>
 
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-900">
-                            {user.name}
-                          </p>
-
-                          <p className="mt-1 break-all text-sm text-slate-500">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      {user.company ? (
-                        <>
-                          <p className="text-sm font-medium text-slate-700">
-                            {
-                              user.company
-                                .name
-                            }
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            {
-                              user.company
-                                .code
-                            }
-                          </p>
-                        </>
-                      ) : (
-                        <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
-                          Global access
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      {user.roles.length > 0 ? (
-                        <div className="flex max-w-xs flex-wrap gap-2">
-                          {user.roles.map(
-                            (role) => (
-                              <span
-                                key={role.id}
-                                className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800"
-                              >
-                                {role.name}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-amber-700">
-                          No role assigned
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-slate-700">
-                        {
-                          user.branches_count
-                        }{" "}
-                        branches
-                      </p>
-
-                      <p className="mt-1 text-sm text-slate-500">
-                        {
-                          user.warehouses_count
-                        }{" "}
-                        warehouses
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      {formatDate(
-                        user.created_at
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        <Link
-                          href={`/dashboard/user-assignments?user_id=${user.id}`}
-                          className="rounded-md border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+                      <td className="px-5 py-4">
+                        <span
+                          className={
+                            user.is_active
+                              ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+                              : "inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800"
+                          }
                         >
-                          Assign access
-                        </Link>
+                          {user.is_active
+                            ? "Active"
+                            : "Inactive"}
+                        </span>
+                      </td>
 
-                        {canUpdateUser ? (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              void openEditUserForm(
-                                user
-                              )
-                            }
-                            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                          >
-                            Edit
-                          </button>
+                      <td className="px-5 py-4">
+                        {user.company ? (
+                          <>
+                            <p className="text-sm font-medium text-slate-700">
+                              {
+                                user.company
+                                  .name
+                              }
+                            </p>
+
+                            <p className="mt-1 text-xs text-slate-500">
+                              {
+                                user.company
+                                  .code
+                              }
+                            </p>
+                          </>
                         ) : (
-                          <span className="text-xs text-slate-400">
-                            View only
+                          <span className="inline-flex rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">
+                            Global access
                           </span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      <td className="px-5 py-4">
+                        {user.roles.length >
+                        0 ? (
+                          <div className="flex max-w-xs flex-wrap gap-2">
+                            {user.roles.map(
+                              (role) => (
+                                <span
+                                  key={role.id}
+                                  className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800"
+                                >
+                                  {role.name}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-amber-700">
+                            No role assigned
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-medium text-slate-700">
+                          {
+                            user.branches_count
+                          }{" "}
+                          branches
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          {
+                            user.warehouses_count
+                          }{" "}
+                          warehouses
+                        </p>
+                      </td>
+
+                      <td className="px-5 py-4 text-sm text-slate-600">
+                        {formatDate(
+                          user.created_at
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={`/dashboard/user-assignments?user_id=${user.id}`}
+                            className="rounded-md border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+                          >
+                            Assign access
+                          </Link>
+
+                          {canUpdateUser && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void openEditUserForm(
+                                  user
+                                )
+                              }
+                              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                              Edit
+                            </button>
+                          )}
+
+                          {canDeactivateUser &&
+                            !isCurrentUser &&
+                            !isUserSuperAdmin && (
+                              <button
+                                type="button"
+                                disabled={
+                                  isStatusChanging
+                                }
+                                onClick={() =>
+                                  void handleUserStatusChange(
+                                    user
+                                  )
+                                }
+                                className={
+                                  user.is_active
+                                    ? "rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    : "rounded-md border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                }
+                              >
+                                {isStatusChanging
+                                  ? "Saving..."
+                                  : user.is_active
+                                    ? "Deactivate"
+                                    : "Activate"}
+                              </button>
+                            )}
+
+                          {!canUpdateUser &&
+                            !canDeactivateUser && (
+                              <span className="text-xs text-slate-400">
+                                View only
+                              </span>
+                            )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

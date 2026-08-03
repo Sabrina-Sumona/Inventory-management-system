@@ -60,7 +60,9 @@ class UserController extends Controller
             ],
         ]);
 
-        $search = $validated['search'] ?? null;
+        $search =
+            $validated['search'] ?? null;
+
         $sortBy =
             $validated['sort_by'] ?? 'name';
 
@@ -210,6 +212,8 @@ class UserController extends Controller
 
                         'password' =>
                             $validated['password'],
+
+                        'is_active' => true,
                     ]);
 
                 foreach ($roles as $role) {
@@ -373,6 +377,120 @@ class UserController extends Controller
             'success' => true,
             'message' =>
                 'User updated successfully.',
+
+            'data' => [
+                'user' => (
+                    new UserResource($user)
+                )->resolve($request),
+            ],
+        ]);
+    }
+
+    public function deactivate(
+        Request $request,
+        User $user
+    ): JsonResponse {
+        Gate::authorize(
+            'deactivate',
+            $user
+        );
+
+        /** @var User $authenticatedUser */
+        $authenticatedUser =
+            $request->user();
+
+        if (
+            $authenticatedUser->is(
+                $user
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'You cannot deactivate your own account.',
+                ],
+            ]);
+        }
+
+        if ($user->isSuperAdmin()) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'A super administrator account cannot be deactivated.',
+                ],
+            ]);
+        }
+
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'This user account is already deactivated.',
+                ],
+            ]);
+        }
+
+        $user->update([
+            'is_active' => false,
+        ]);
+
+        $user
+            ->refresh()
+            ->load([
+                'company:id,name,code',
+                'roles:id,name,code',
+            ])
+            ->loadCount([
+                'branches',
+                'warehouses',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+                'User deactivated successfully.',
+
+            'data' => [
+                'user' => (
+                    new UserResource($user)
+                )->resolve($request),
+            ],
+        ]);
+    }
+
+    public function activate(
+        Request $request,
+        User $user
+    ): JsonResponse {
+        Gate::authorize(
+            'deactivate',
+            $user
+        );
+
+        if ($user->is_active) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'This user account is already active.',
+                ],
+            ]);
+        }
+
+        $user->update([
+            'is_active' => true,
+        ]);
+
+        $user
+            ->refresh()
+            ->load([
+                'company:id,name,code',
+                'roles:id,name,code',
+            ])
+            ->loadCount([
+                'branches',
+                'warehouses',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+                'User activated successfully.',
 
             'data' => [
                 'user' => (

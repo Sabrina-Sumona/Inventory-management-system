@@ -15,6 +15,7 @@ export interface User {
   company_id: number | null;
   name: string;
   email: string;
+  is_active: boolean;
   company: UserCompany | null;
   roles: UserRole[];
   branches_count: number;

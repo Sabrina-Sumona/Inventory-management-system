@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health', function () {
     return response()->json([
         'success' => true,
-        'message' => 'Inventory Management API is running.',
+        'message' =>
+            'Inventory Management API is running.',
         'data' => [
             'service' => 'Laravel API',
             'status' => 'healthy',
@@ -33,14 +34,20 @@ Route::post('/auth/login', [
 Route::post('/auth/forgot-password', [
     PasswordResetController::class,
     'sendResetLink',
-])->middleware('throttle:password-reset-link');
+])->middleware(
+    'throttle:password-reset-link'
+);
 
 Route::post('/auth/reset-password', [
     PasswordResetController::class,
     'reset',
-])->middleware('throttle:password-reset');
+])->middleware(
+    'throttle:password-reset'
+);
 
-Route::middleware('auth:sanctum')->group(function (): void {
+Route::middleware(
+    'auth:sanctum'
+)->group(function (): void {
     Route::get(
         '/auth/user',
         CurrentUserController::class
@@ -123,34 +130,41 @@ Route::middleware('auth:sanctum')->group(function (): void {
             SupplierContactController::class,
             'restore',
         ]
-    )->whereNumber('supplierContact');
+    )->whereNumber(
+        'supplierContact'
+    );
 
     Route::apiResource(
         'supplier-contacts',
         SupplierContactController::class
-    )->parameters([
-        'supplier-contacts' => 'supplierContact',
-    ])->only([
-        'index',
-        'store',
-        'show',
-        'update',
-        'destroy',
-    ]);
+    )
+        ->parameters([
+            'supplier-contacts' =>
+                'supplierContact',
+        ])
+        ->only([
+            'index',
+            'store',
+            'show',
+            'update',
+            'destroy',
+        ]);
 
     Route::apiResource(
         'supplier-financial-settings',
         SupplierFinancialSettingController::class
-    )->parameters([
-        'supplier-financial-settings' =>
-            'supplierFinancialSetting',
-    ])->only([
-        'index',
-        'store',
-        'show',
-        'update',
-        'destroy',
-    ]);
+    )
+        ->parameters([
+            'supplier-financial-settings' =>
+                'supplierFinancialSetting',
+        ])
+        ->only([
+            'index',
+            'store',
+            'show',
+            'update',
+            'destroy',
+        ]);
 
     Route::get(
         '/roles',
@@ -159,6 +173,22 @@ Route::middleware('auth:sanctum')->group(function (): void {
             'index',
         ]
     );
+
+    Route::patch(
+        '/users/{user}/deactivate',
+        [
+            UserController::class,
+            'deactivate',
+        ]
+    )->whereNumber('user');
+
+    Route::patch(
+        '/users/{user}/activate',
+        [
+            UserController::class,
+            'activate',
+        ]
+    )->whereNumber('user');
 
     Route::apiResource(
         'users',

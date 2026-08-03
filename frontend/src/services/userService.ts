@@ -73,4 +73,26 @@ export const userService = {
 
     return response.data.data.user;
   },
+
+  async deactivateUser(
+    userId: number
+  ): Promise<User> {
+    const response =
+      await api.patch<UserMutationResponse>(
+        `/api/users/${userId}/deactivate`
+      );
+
+    return response.data.data.user;
+  },
+
+  async activateUser(
+    userId: number
+  ): Promise<User> {
+    const response =
+      await api.patch<UserMutationResponse>(
+        `/api/users/${userId}/activate`
+      );
+
+    return response.data.data.user;
+  },
 };
