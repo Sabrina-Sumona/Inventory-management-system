@@ -29,13 +29,21 @@ class RoleSeeder extends Seeder
                 'permissions' => '*',
             ],
             [
-                'company_id' => $company->id,
-                'name' => 'Company Admin',
+                'company_id' =>
+                    $company->id,
+
+                'name' =>
+                    'Company Admin',
+
                 'code' =>
                     'DESH-SOLAR-COMPANY-ADMIN',
+
                 'description' =>
-                    'Manages Desh Solar organization, warehouses, suppliers, customers, users, and access control.',
-                'is_system' => false,
+                    'Manages Desh Solar organization, warehouses, suppliers, customers, customer contacts, users, and access control.',
+
+                'is_system' =>
+                    false,
+
                 'permissions' => [
                     'company.view',
                     'company.update',
@@ -70,6 +78,11 @@ class RoleSeeder extends Seeder
                     'customer.update',
                     'customer.delete',
 
+                    'customer-contact.view',
+                    'customer-contact.create',
+                    'customer-contact.update',
+                    'customer-contact.delete',
+
                     'user.view',
                     'user.create',
                     'user.update',
@@ -84,13 +97,21 @@ class RoleSeeder extends Seeder
                 ],
             ],
             [
-                'company_id' => $company->id,
-                'name' => 'Inventory Manager',
+                'company_id' =>
+                    $company->id,
+
+                'name' =>
+                    'Inventory Manager',
+
                 'code' =>
                     'DESH-SOLAR-INVENTORY-MANAGER',
+
                 'description' =>
-                    'Manages inventory operations, warehouse records, suppliers, customers, supplier contacts, and supplier financial settings.',
-                'is_system' => false,
+                    'Manages inventory operations, warehouse records, suppliers, customers, supplier contacts, customer contacts, and supplier financial settings.',
+
+                'is_system' =>
+                    false,
+
                 'permissions' => [
                     'company.view',
                     'branch.view',
@@ -115,18 +136,30 @@ class RoleSeeder extends Seeder
                     'customer.create',
                     'customer.update',
 
+                    'customer-contact.view',
+                    'customer-contact.create',
+                    'customer-contact.update',
+
                     'user.view',
                     'role.view',
                 ],
             ],
             [
-                'company_id' => $company->id,
-                'name' => 'Warehouse Manager',
+                'company_id' =>
+                    $company->id,
+
+                'name' =>
+                    'Warehouse Manager',
+
                 'code' =>
                     'DESH-SOLAR-WAREHOUSE-MANAGER',
+
                 'description' =>
                     'Manages assigned warehouse operations and views permitted supplier, customer, contact, and financial information.',
-                'is_system' => false,
+
+                'is_system' =>
+                    false,
+
                 'permissions' => [
                     'company.view',
                     'branch.view',
@@ -139,16 +172,25 @@ class RoleSeeder extends Seeder
                     'supplier-financial-setting.view',
 
                     'customer.view',
+                    'customer-contact.view',
                 ],
             ],
             [
-                'company_id' => $company->id,
-                'name' => 'Storekeeper',
+                'company_id' =>
+                    $company->id,
+
+                'name' =>
+                    'Storekeeper',
+
                 'code' =>
                     'DESH-SOLAR-STOREKEEPER',
+
                 'description' =>
-                    'Handles day-to-day warehouse inventory operations and views permitted supplier and customer information.',
-                'is_system' => false,
+                    'Handles day-to-day warehouse inventory operations and views permitted supplier, customer, and contact information.',
+
+                'is_system' =>
+                    false,
+
                 'permissions' => [
                     'company.view',
                     'branch.view',
@@ -159,16 +201,25 @@ class RoleSeeder extends Seeder
                     'supplier-financial-setting.view',
 
                     'customer.view',
+                    'customer-contact.view',
                 ],
             ],
             [
-                'company_id' => $company->id,
-                'name' => 'Viewer',
+                'company_id' =>
+                    $company->id,
+
+                'name' =>
+                    'Viewer',
+
                 'code' =>
                     'DESH-SOLAR-VIEWER',
+
                 'description' =>
                     'Read-only access to permitted organization, supplier, customer, contact, and financial-setting records.',
-                'is_system' => false,
+
+                'is_system' =>
+                    false,
+
                 'permissions' => [
                     'company.view',
                     'branch.view',
@@ -179,6 +230,7 @@ class RoleSeeder extends Seeder
                     'supplier-financial-setting.view',
 
                     'customer.view',
+                    'customer-contact.view',
                 ],
             ],
         ];

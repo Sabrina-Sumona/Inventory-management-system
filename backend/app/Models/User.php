@@ -131,6 +131,22 @@ class User extends Authenticatable
         );
     }
 
+    public function createdCustomerContacts(): HasMany
+    {
+        return $this->hasMany(
+            CustomerContact::class,
+            'created_by'
+        );
+    }
+
+    public function updatedCustomerContacts(): HasMany
+    {
+        return $this->hasMany(
+            CustomerContact::class,
+            'updated_by'
+        );
+    }
+
     public function hasRole(
         string $roleCode
     ): bool {

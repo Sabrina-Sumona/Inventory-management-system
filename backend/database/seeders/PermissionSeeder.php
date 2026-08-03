@@ -206,6 +206,36 @@ class PermissionSeeder extends Seeder
                 'description' => 'Delete customer records.',
             ],
 
+            // Customer Contact
+            [
+                'name' => 'View Customer Contacts',
+                'code' => 'customer-contact.view',
+                'module' => 'customer-contact',
+                'action' => 'view',
+                'description' => 'View customer contact records.',
+            ],
+            [
+                'name' => 'Create Customer Contacts',
+                'code' => 'customer-contact.create',
+                'module' => 'customer-contact',
+                'action' => 'create',
+                'description' => 'Create new customer contacts.',
+            ],
+            [
+                'name' => 'Update Customer Contacts',
+                'code' => 'customer-contact.update',
+                'module' => 'customer-contact',
+                'action' => 'update',
+                'description' => 'Update customer contact records.',
+            ],
+            [
+                'name' => 'Delete Customer Contacts',
+                'code' => 'customer-contact.delete',
+                'module' => 'customer-contact',
+                'action' => 'delete',
+                'description' => 'Delete customer contact records.',
+            ],
+
             // Users
             [
                 'name' => 'View Users',
@@ -275,7 +305,7 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permissionData) {
-            Permission::updateOrCreate(
+            Permission::query()->updateOrCreate(
                 [
                     'code' => $permissionData['code'],
                 ],

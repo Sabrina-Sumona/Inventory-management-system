@@ -20,7 +20,7 @@ class DefaultAccessControlSeederTest extends TestCase
 
         $this->assertDatabaseCount(
             'permissions',
-            35
+            39
         );
 
         $this->assertDatabaseCount(
@@ -233,6 +233,58 @@ class DefaultAccessControlSeederTest extends TestCase
             ]
         );
 
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'customer-contact.view',
+
+                'module' =>
+                    'customer-contact',
+
+                'action' => 'view',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'customer-contact.create',
+
+                'module' =>
+                    'customer-contact',
+
+                'action' => 'create',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'customer-contact.update',
+
+                'module' =>
+                    'customer-contact',
+
+                'action' => 'update',
+            ]
+        );
+
+        $this->assertDatabaseHas(
+            'permissions',
+            [
+                'code' =>
+                    'customer-contact.delete',
+
+                'module' =>
+                    'customer-contact',
+
+                'action' => 'delete',
+            ]
+        );
+
         $this->assertDatabaseMissing(
             'permissions',
             [
@@ -391,7 +443,7 @@ class DefaultAccessControlSeederTest extends TestCase
 
         $this->assertDatabaseCount(
             'permissions',
-            35
+            39
         );
 
         $this->assertDatabaseCount(

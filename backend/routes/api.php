@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\CurrentUserController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\CustomerContactController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SupplierContactController;
@@ -200,6 +201,32 @@ Route::middleware(
         'update',
         'destroy',
     ]);
+
+    Route::post(
+        '/customer-contacts/{customerContact}/restore',
+        [
+            CustomerContactController::class,
+            'restore',
+        ]
+    )->whereNumber(
+        'customerContact'
+    );
+
+    Route::apiResource(
+        'customer-contacts',
+        CustomerContactController::class
+    )
+        ->parameters([
+            'customer-contacts' =>
+                'customerContact',
+        ])
+        ->only([
+            'index',
+            'store',
+            'show',
+            'update',
+            'destroy',
+        ]);
 
     Route::get(
         '/roles',
